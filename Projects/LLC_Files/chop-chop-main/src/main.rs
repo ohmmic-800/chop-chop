@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Box as GtkBox, Button, Orientation, Entry, Label, Adjustment, SpinButton}; // TODO: Remove unneeded use statements. 
+use gtk::{Application, ApplicationWindow, Box as GtkBox, Button, Orientation, Entry, Label, Adjustment, SpinButton, DropDown}; // TODO: Remove unneeded use statements. 
 const APP_ID: &str = "org.gtk_rs.HelloWorld3";
 
 fn main() {
@@ -104,11 +104,7 @@ fn build_input_section(vsk: &GtkBox, title: &String, child_type: InputSectionChi
     
     // Build entry box area. 
     let input_section = GtkBox::new(Orientation::Horizontal, 10);
-
-    let entry_box = Entry::new();
-    entry_box.set_placeholder_text(Some(""));
-
-    input_section.append(&entry_box);
+    input_section.append(&Entry::new());
 
     // Add child widget when applicable. 
     match child_type {
@@ -118,7 +114,11 @@ fn build_input_section(vsk: &GtkBox, title: &String, child_type: InputSectionChi
             input_section.append(&spin);
         },
         InputSectionChild::DropDownMenu => {
-            // TODO: Implement this. 
+            input_section.append(&Entry::new());
+            let dropdown = DropDown::from_strings(&["Option 1", "Option 2", "Option 3"]);
+                    dropdown.set_selected(0);
+            input_section.append(&dropdown);
+
         },
         InputSectionChild::Null => (),
     };
