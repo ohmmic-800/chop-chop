@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Box as GtkBox, Button, Orientation, Entry}; // TODO: Remove unneeded use statements. 
+use gtk::{Application, ApplicationWindow, Box as GtkBox, Button, Orientation, Entry, Label, Adjustment, SpinButton}; // TODO: Remove unneeded use statements. 
 const APP_ID: &str = "org.gtk_rs.HelloWorld3";
 
 fn main() {
@@ -75,16 +75,16 @@ fn build_menu_bar(top_menu_hsk: &GtkBox) {
 fn build_edit_window(edit_window_vsk: &GtkBox) {
     // Build input sections. 
     let description_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(&description_input_section, &String::from("Description"));
+    build_input_section(&description_input_section, &String::from("Description"), InputSectionChild::Null);
 
     let quantity_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(&quantity_input_section, &String::from("Quantity"));
+    build_input_section(&quantity_input_section, &String::from("Quantity"), InputSectionChild::SpinBox);
 
     let length_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(&length_input_section, &String::from("Length"));
+    build_input_section(&length_input_section, &String::from("Length"), InputSectionChild::DropDownMenu);
 
     let price_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(&price_input_section, &String::from("Price"));
+    build_input_section(&price_input_section, &String::from("Price"), InputSectionChild::Null);
 
     // Build 'add' button. 
     let add_button = Button::builder()
@@ -99,9 +99,38 @@ fn build_edit_window(edit_window_vsk: &GtkBox) {
     edit_window_vsk.append(&add_button);
 }
 
-fn build_input_section(vsk: &GtkBox, title: &String) { // TODO: Use custom enum to allow for dynamic 'child' passing. 
-    let entry = Entry::new();
-    entry.set_placeholder_text(Some(title));
+fn build_input_section(vsk: &GtkBox, title: &String, child_type: InputSectionChild) { // TODO: Use custom enum to allow for dynamic 'child' passing. 
+    let label = Label::new(Some(title));
+    
+    // Build entry box area. 
+    let input_section = GtkBox::new(Orientation::Horizontal, 10);
 
-    vsk.append(&entry);
+    let entry_box = Entry::new();
+    entry_box.set_placeholder_text(Some(""));
+
+    input_section.append(&entry_box);
+
+    // Add child widget when applicable. 
+    match child_type {
+        InputSectionChild::SpinBox => {
+            let adjustment = Adjustment::new(0.0, 0.0, f64::MAX, 1.0, 10.0, 0.0);
+            let spin = SpinButton::new(Some(&adjustment), 1.0, 0); 
+            input_section.append(&spin);
+        },
+        InputSectionChild::DropDownMenu => {
+            // TODO: Implement this. 
+        },
+        InputSectionChild::Null => (),
+    };
+
+    // Put all the pieces together. 
+    vsk.append(&label);
+    vsk.append(&input_section);
+}
+
+// This enum represents possible child types for a input_section. 
+enum InputSectionChild {
+    SpinBox, 
+    DropDownMenu,
+    Null
 }
