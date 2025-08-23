@@ -1,5 +1,8 @@
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Box as GtkBox, Button, Orientation, Entry, Label, Adjustment, SpinButton, DropDown}; // TODO: Remove unneeded use statements. 
+use gtk::{
+    Adjustment, Application, ApplicationWindow, Box as GtkBox, Button, DropDown, Entry, Label,
+    Orientation, SpinButton,
+}; // TODO: Remove unneeded use statements. 
 const APP_ID: &str = "org.gtk_rs.HelloWorld3";
 
 fn main() {
@@ -40,20 +43,14 @@ fn build_ui(app: &Application) {
 
 fn build_menu_bar(top_menu_hsk: &GtkBox) {
     // Create Menu Buttons.
-    let materials_menu_button = Button::builder()
-    .label("Materials")
-    .build();
+    let materials_menu_button = Button::builder().label("Materials").build();
 
-    let cuts_menu_button = Button::builder()
-    .label("Cuts")
-    .build();
+    let cuts_menu_button = Button::builder().label("Cuts").build();
 
-    let solver_menu_button = Button::builder()
-    .label("Solver")
-    .build();
+    let solver_menu_button = Button::builder().label("Solver").build();
 
     let exit_button = Button::builder()
-    .label("X")// TODO: Use actual 'exit' char here. 
+    .label("X") // TODO: Use actual 'exit' char here. 
     .build();
 
     // Create menu spacers. 
@@ -75,21 +72,35 @@ fn build_menu_bar(top_menu_hsk: &GtkBox) {
 fn build_edit_window(edit_window_vsk: &GtkBox) {
     // Build input sections. 
     let description_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(&description_input_section, &String::from("Description"), InputSectionChild::Null);
+    build_input_section(
+&description_input_section,
+&String::from("Description"),
+InputSectionChild::Null,
+);
 
     let quantity_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(&quantity_input_section, &String::from("Quantity"), InputSectionChild::SpinBox);
+    build_input_section(
+&quantity_input_section,
+&String::from("Quantity"),
+InputSectionChild::SpinBox,
+);
 
     let length_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(&length_input_section, &String::from("Length"), InputSectionChild::DropDownMenu);
+    build_input_section(
+&length_input_section,
+&String::from("Length"),
+InputSectionChild::DropDownMenu,
+);
 
     let price_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(&price_input_section, &String::from("Price"), InputSectionChild::Null);
+    build_input_section(
+&price_input_section,
+&String::from("Price"),
+InputSectionChild::Null,
+);
 
     // Build 'add' button. 
-    let add_button = Button::builder()
-    .label("Add")
-    .build();
+    let add_button = Button::builder().label("Add").build();
 
     // Build edit window. 
     edit_window_vsk.append(&description_input_section);
@@ -99,7 +110,8 @@ fn build_edit_window(edit_window_vsk: &GtkBox) {
     edit_window_vsk.append(&add_button);
 }
 
-fn build_input_section(vsk: &GtkBox, title: &String, child_type: InputSectionChild) { // TODO: Use custom enum to allow for dynamic 'child' passing. 
+fn build_input_section(vsk: &GtkBox, title: &String, child_type: InputSectionChild) {
+// TODO: Use custom enum to allow for dynamic 'child' passing. 
     let label = Label::new(Some(title));
     
     // Build entry box area. 
@@ -112,14 +124,13 @@ fn build_input_section(vsk: &GtkBox, title: &String, child_type: InputSectionChi
             let adjustment = Adjustment::new(0.0, 0.0, f64::MAX, 1.0, 10.0, 0.0);
             let spin = SpinButton::new(Some(&adjustment), 1.0, 0); 
             input_section.append(&spin);
-        },
+        }
         InputSectionChild::DropDownMenu => {
             input_section.append(&Entry::new());
             let dropdown = DropDown::from_strings(&["Option 1", "Option 2", "Option 3"]);
                     dropdown.set_selected(0);
             input_section.append(&dropdown);
-
-        },
+}
         InputSectionChild::Null => (),
     };
 
@@ -132,5 +143,5 @@ fn build_input_section(vsk: &GtkBox, title: &String, child_type: InputSectionChi
 enum InputSectionChild {
     SpinBox, 
     DropDownMenu,
-    Null
+    Null,
 }
