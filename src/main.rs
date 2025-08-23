@@ -1,9 +1,11 @@
-use gtk::prelude::*;
-use gtk::{
-    Adjustment, Application, ApplicationWindow, Box as GtkBox, Button, DropDown, Entry, Label,
-    Orientation, SpinButton,
-}; // TODO: Remove unneeded use statements. 
-const APP_ID: &str = "org.gtk_rs.HelloWorld3";
+use adw::prelude::*;
+use adw::{
+    Application, ApplicationWindow, HeaderBar, OverlaySplitView, ViewStack, ViewSwitcher,
+    ViewSwitcherPolicy,
+};
+use gtk::Text;
+use gtk::{Adjustment, Box as GtkBox, Button, DropDown, Entry, Label, Orientation, SpinButton}; // TODO: Remove unneeded use statements. 
+const APP_ID: &str = "com.ohmm-software.Chop-Chop";
 
 pub mod modeling;
 pub mod solvers;
@@ -30,14 +32,44 @@ fn build_ui(app: &Application) {
 
     // Build 'parent' HStack.
     let parent_hsk = GtkBox::new(Orientation::Vertical, 10);
-    parent_hsk.append(&top_menu_hsk);
+    // parent_hsk.append(&top_menu_hsk);
     parent_hsk.append(&edit_window_vsk);
+
+    let split_view = OverlaySplitView::builder()
+        .content(&Text::builder().text("Materials page").build())
+        .sidebar(&parent_hsk)
+        .vexpand(true)
+        .build();
+    let view_stack = ViewStack::new();
+    view_stack.add_titled_with_icon(&split_view, None, "Materials", "document-edit-symbolic");
+    view_stack.add_titled_with_icon(
+        &Text::builder().text("Parts page").build(),
+        None,
+        "Parts",
+        "emoji-body-symbolic",
+    );
+    view_stack.add_titled_with_icon(
+        &Text::builder().text("Solver page").build(),
+        None,
+        "Solver",
+        "emote-love-symbolic",
+    );
+    let view_switcher = ViewSwitcher::builder()
+        .stack(&view_stack)
+        .policy(ViewSwitcherPolicy::Wide)
+        .build();
+    let header_bar = HeaderBar::builder().title_widget(&view_switcher).build();
+
+    // Build HStack to store Menu buttons.
+    let content = GtkBox::new(Orientation::Vertical, 0);
+    content.append(&header_bar);
+    content.append(&view_stack);
 
     // Create a window
     let window = ApplicationWindow::builder()
         .application(app)
-        .title("My GTK App")
-        .child(&parent_hsk)
+        .title("Chop-Chop")
+        .content(&content)
         .build();
 
     // Present window
