@@ -16,3 +16,14 @@ cargo run
 ## Style
 
 Format code using `rustfmt` (default settings). Limit lines to 100 characters.
+
+## Tests
+
+To run unit tests:
+```
+cargo test
+```
+To run unit tests and show printed output:
+```
+cargo test -- --nocapture
+```
