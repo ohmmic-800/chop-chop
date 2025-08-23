@@ -3,8 +3,10 @@ use adw::{
     Application, ApplicationWindow, HeaderBar, OverlaySplitView, ViewStack, ViewSwitcher,
     ViewSwitcherPolicy,
 };
-use gtk::Text;
-use gtk::{Adjustment, Box as GtkBox, Button, DropDown, Entry, Label, Orientation, SpinButton}; // TODO: Remove unneeded use statements. 
+use gtk::{
+    Adjustment, Box as GtkBox, Button, ColumnView, ColumnViewColumn, DropDown, Entry, Label,
+    Orientation, SpinButton, Text,
+};
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
 
 pub mod modeling;
@@ -35,8 +37,14 @@ fn build_ui(app: &Application) {
     // parent_hsk.append(&top_menu_hsk);
     parent_hsk.append(&edit_window_vsk);
 
+    let materials_list = ColumnView::builder().build();
+    materials_list.append_column(&ColumnViewColumn::builder().title("Column 1").build());
+    materials_list.append_column(&ColumnViewColumn::builder().title("Column 2").build());
+    materials_list.append_column(&ColumnViewColumn::builder().title("Column 3").build());
+    // Need to use a ListItemFactory here?
+
     let split_view = OverlaySplitView::builder()
-        .content(&Text::builder().text("Materials page").build())
+        .content(&materials_list)
         .sidebar(&parent_hsk)
         .vexpand(true)
         .build();
