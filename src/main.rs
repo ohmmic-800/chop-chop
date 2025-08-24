@@ -24,17 +24,12 @@ fn main() {
 }
 
 fn build_ui(app: &Application) {
-    // Build HStack to store Menu buttons.
-    let top_menu_hsk = GtkBox::new(Orientation::Horizontal, 10);
-    build_menu_bar(&top_menu_hsk);
-
     // Build VStack for 'edit' window.
     let edit_window_vsk = GtkBox::new(Orientation::Vertical, 10);
     build_edit_window(&edit_window_vsk);
 
     // Build 'parent' HStack.
     let parent_hsk = GtkBox::new(Orientation::Vertical, 10);
-    // parent_hsk.append(&top_menu_hsk);
     parent_hsk.append(&edit_window_vsk);
 
     let materials_list = ColumnView::builder().build();
@@ -82,34 +77,6 @@ fn build_ui(app: &Application) {
 
     // Present window
     window.present();
-}
-
-fn build_menu_bar(top_menu_hsk: &GtkBox) {
-    // Create Menu Buttons.
-    let materials_menu_button = Button::builder().label("Materials").build();
-
-    let cuts_menu_button = Button::builder().label("Cuts").build();
-
-    let solver_menu_button = Button::builder().label("Solver").build();
-
-    let exit_button = Button::builder()
-        .label("X") // TODO: Use actual 'exit' char here.
-        .build();
-
-    // Create menu spacers.
-    let top_menu_spacer_left = GtkBox::new(Orientation::Horizontal, 0);
-    top_menu_spacer_left.set_width_request(50);
-
-    let top_menu_spacer_right = GtkBox::new(Orientation::Horizontal, 0);
-    top_menu_spacer_right.set_width_request(50);
-
-    // Build top menu hstack.
-    top_menu_hsk.append(&top_menu_spacer_right);
-    top_menu_hsk.append(&materials_menu_button);
-    top_menu_hsk.append(&cuts_menu_button);
-    top_menu_hsk.append(&solver_menu_button);
-    top_menu_hsk.append(&top_menu_spacer_left);
-    top_menu_hsk.append(&exit_button);
 }
 
 fn build_edit_window(edit_window_vsk: &GtkBox) {
