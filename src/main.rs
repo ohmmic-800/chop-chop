@@ -1,11 +1,10 @@
-use adw::prelude::*;
 use adw::{
-    Application, ApplicationWindow, HeaderBar, OverlaySplitView, ViewStack, ViewSwitcher,
-    ViewSwitcherPolicy,
+    Application, ApplicationWindow, ComboRow, HeaderBar, OverlaySplitView, ViewStack, ViewSwitcher,
+    ViewSwitcherPolicy, prelude::*,
 };
 use gtk::{
     Adjustment, Box as GtkBox, Button, ColumnView, ColumnViewColumn, DropDown, Entry, Label,
-    Orientation, SpinButton, Text, glib,
+    Orientation, SpinButton, StringList, Text, glib,
 };
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
 
@@ -38,25 +37,36 @@ fn build_ui(app: &Application) {
     materials_list.append_column(&ColumnViewColumn::builder().title("Column 3").build());
     // Need to use a ListItemFactory here?
 
-    let split_view = OverlaySplitView::builder()
+    let split_view_1 = OverlaySplitView::builder()
         .content(&materials_list)
         .sidebar(&parent_hsk)
         .vexpand(true)
+        .min_sidebar_width(250.0)
         .build();
     let view_stack = ViewStack::new();
-    view_stack.add_titled_with_icon(&split_view, None, "Materials", "document-edit-symbolic");
+    view_stack.add_titled_with_icon(&split_view_1, None, "Materials", "document-edit-symbolic");
     view_stack.add_titled_with_icon(
         &Text::builder().text("Parts page").build(),
         None,
         "Parts",
         "emoji-body-symbolic",
     );
-    view_stack.add_titled_with_icon(
-        &Text::builder().text("Solver page").build(),
-        None,
-        "Solver",
-        "emote-love-symbolic",
+    let solver_sidebar = GtkBox::new(Orientation::Vertical, 10);
+    solver_sidebar.append(
+        &ComboRow::builder()
+            .title("Algorithm")
+            .subtitle("Optimization method")
+            .model(&StringList::new(&[&"Algo1", &"Algo2", &"Algo3"]))
+            .selected(0)
+            .build(),
     );
+    let split_view_3 = OverlaySplitView::builder()
+        .content(&Text::builder().text("Solver content").build())
+        .sidebar(&solver_sidebar)
+        .vexpand(true)
+        .min_sidebar_width(250.0)
+        .build();
+    view_stack.add_titled_with_icon(&split_view_3, None, "Solver", "emote-love-symbolic");
     let view_switcher = ViewSwitcher::builder()
         .stack(&view_stack)
         .policy(ViewSwitcherPolicy::Wide)
@@ -73,6 +83,8 @@ fn build_ui(app: &Application) {
         .application(app)
         .title("Chop-Chop")
         .content(&content)
+        .width_request(750)
+        .height_request(500)
         .build();
 
     // Present window
