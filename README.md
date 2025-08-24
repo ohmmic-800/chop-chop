@@ -27,3 +27,16 @@ To run unit tests and show printed output:
 ```
 cargo test -- --nocapture
 ```
+
+## Implementation Notes/Todos
+
+- Setting to show all illustrations at the same scale
+- Save/load project to json file
+- Allow the unit system to change between items
+- Specify the default unit system in settings
+- Print report or save as PDF
+- Overlay "jump to material" list in report view
+- Solver options:
+    - Algorithm
+    - Blade width
+    - Choice to minimize waste or cost
