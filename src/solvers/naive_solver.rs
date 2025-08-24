@@ -60,11 +60,11 @@ impl Solver for NaiveSolver {
                 }
             }
         }
-        return Ok(Solution {
+        Ok(Solution {
             cut_lists,
             supply_consumption,
             total_price,
-        });
+        })
     }
 }
 
