@@ -1,11 +1,12 @@
 use adw::{
-    Application, ApplicationWindow, ComboRow, HeaderBar, OverlaySplitView, ViewStack, ViewSwitcher,
-    ViewSwitcherPolicy, prelude::*,
+    prelude::*, Application, ApplicationWindow, ComboRow, HeaderBar, OverlaySplitView, SpinRow, ViewStack, ViewSwitcher, ViewSwitcherPolicy,
+    EntryRow
 };
 use gtk::{
-    Adjustment, Box as GtkBox, Button, ColumnView, ColumnViewColumn, DropDown, Entry, Label,
-    Orientation, SpinButton, StringList, Text, glib,
+    Box as GtkBox, ColumnView, ColumnViewColumn, Orientation, StringList, Text, glib,
+    Adjustment, Button, DropDown
 };
+
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
 
 pub mod modeling;
@@ -24,7 +25,8 @@ fn main() -> glib::ExitCode {
 
 fn build_ui(app: &Application) {
     // Build VStack for 'edit' window.
-    let edit_window_vsk = GtkBox::new(Orientation::Vertical, 10);
+    let edit_window_vsk = GtkBox::new(Orientation::Vertical, 25);
+    edit_window_vsk.set_width_request(250); // Needed to prevent multiline titles in edit window. 
     build_edit_window(&edit_window_vsk);
 
     // Build 'parent' HStack.
@@ -92,78 +94,44 @@ fn build_ui(app: &Application) {
 }
 
 fn build_edit_window(edit_window_vsk: &GtkBox) {
-    // Build input sections.
-    let description_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(
-        &description_input_section,
-        &String::from("Description"),
-        InputSectionChild::Null,
-    );
+    // Build description entry. 
+    let description_entry = EntryRow::new();
+    description_entry.set_title("Description");
+    description_entry.set_show_apply_button(true);
 
-    let quantity_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(
-        &quantity_input_section,
-        &String::from("Quantity"),
-        InputSectionChild::SpinBox,
-    );
+    // Build Quantity spin box
+    let adjustment = Adjustment::new(0.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
+    let quantity_row = SpinRow::new(Some(&adjustment), 1.0, 0);
+    quantity_row.set_title("Quantity");
 
-    let length_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(
-        &length_input_section,
-        &String::from("Length"),
-        InputSectionChild::DropDownMenu,
-    );
+    // Build length entry row. 
+    let unit_menu_hsk = GtkBox::new(Orientation::Horizontal, 10);
+    let unit_menu_entry = EntryRow::new();
+    unit_menu_entry.set_title("Length"); // TODO: Split into 2 cells?
+    unit_menu_entry.set_show_apply_button(true);
 
-    let price_input_section = GtkBox::new(Orientation::Vertical, 10);
-    build_input_section(
-        &price_input_section,
-        &String::from("Price"),
-        InputSectionChild::Null,
-    );
+    let options = ["Option 1", "Option 2", "Option 3"];
+    let unit_dropdown = DropDown::from_strings(&options);
 
-    // Build 'add' button.
-    let add_button = Button::builder().label("Add").build();
+    // Build length/unit stack. 
+    unit_menu_hsk.append(&unit_menu_entry);
+    unit_menu_hsk.append(&unit_dropdown);
 
-    // Build edit window.
-    edit_window_vsk.append(&description_input_section);
-    edit_window_vsk.append(&quantity_input_section);
-    edit_window_vsk.append(&length_input_section);
-    edit_window_vsk.append(&price_input_section);
+    // Build price entry
+    let price_entry = EntryRow::new();
+    price_entry.set_title("Price(USD)");
+    price_entry.set_show_apply_button(true);
+
+    // Build add button. 
+    let add_button = Button::new();
+    add_button.set_label("Add");
+
+    // Add items to the stack. 
+    edit_window_vsk.append(&description_entry);
+    edit_window_vsk.append(&quantity_row);
+    edit_window_vsk.append(&unit_menu_hsk);
+    edit_window_vsk.append(&price_entry);
     edit_window_vsk.append(&add_button);
 }
 
-fn build_input_section(vsk: &GtkBox, title: &String, child_type: InputSectionChild) {
-    // TODO: Use custom enum to allow for dynamic 'child' passing.
-    let label = Label::new(Some(title));
 
-    // Build entry box area.
-    let input_section = GtkBox::new(Orientation::Horizontal, 10);
-    input_section.append(&Entry::new());
-
-    // Add child widget when applicable.
-    match child_type {
-        InputSectionChild::SpinBox => {
-            let adjustment = Adjustment::new(0.0, 0.0, f64::MAX, 1.0, 10.0, 0.0);
-            let spin = SpinButton::new(Some(&adjustment), 1.0, 0);
-            input_section.append(&spin);
-        }
-        InputSectionChild::DropDownMenu => {
-            input_section.append(&Entry::new());
-            let dropdown = DropDown::from_strings(&["Option 1", "Option 2", "Option 3"]);
-            dropdown.set_selected(0);
-            input_section.append(&dropdown);
-        }
-        InputSectionChild::Null => (),
-    };
-
-    // Put all the pieces together.
-    vsk.append(&label);
-    vsk.append(&input_section);
-}
-
-// This enum represents possible child types for a input_section.
-enum InputSectionChild {
-    SpinBox,
-    DropDownMenu,
-    Null,
-}
