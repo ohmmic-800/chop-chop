@@ -1,5 +1,5 @@
 use adw::{
-    prelude::*, AboutDialog, Application, ApplicationWindow, ComboRow, EntryRow, HeaderBar, 
+    prelude::*, Application, ApplicationWindow, ComboRow, EntryRow, HeaderBar, 
     OverlaySplitView, SpinRow, ViewStack, ViewSwitcher, ViewSwitcherPolicy,
 };
 use gtk::{
