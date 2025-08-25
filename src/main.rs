@@ -1,10 +1,10 @@
 use adw::{
-    prelude::*, Application, ApplicationWindow, ComboRow, HeaderBar, OverlaySplitView, SpinRow, ViewStack, ViewSwitcher, ViewSwitcherPolicy,
-    EntryRow
+    prelude::*, AboutDialog, Application, ApplicationWindow, ComboRow, EntryRow, HeaderBar, 
+    OverlaySplitView, SpinRow, ViewStack, ViewSwitcher, ViewSwitcherPolicy,
 };
 use gtk::{
     Box as GtkBox, ColumnView, ColumnViewColumn, Orientation, StringList, Text, glib,
-    Adjustment, Button, MenuButton
+    Adjustment, Button, MenuButton,
 };
 
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
@@ -80,6 +80,7 @@ fn build_ui(app: &Application) {
     let menu_button = MenuButton::builder()
     .icon_name("open-menu-symbolic")
     .build(); 
+    build_menu(&menu_button);
 
     header_bar.pack_start(&menu_button);
 
@@ -102,6 +103,7 @@ fn build_ui(app: &Application) {
 }
 
 fn build_edit_window(edit_window_vsk: &GtkBox) {
+
     // Build Quantity spin box
     let adjustment = Adjustment::new(0.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
     let quantity_row = SpinRow::new(Some(&adjustment), 1.0, 0);
@@ -140,4 +142,6 @@ fn build_edit_window(edit_window_vsk: &GtkBox) {
     .build());
 }
 
-
+fn build_menu(menu_button: &MenuButton) {
+    // TODO: Add item elements here. 
+}
