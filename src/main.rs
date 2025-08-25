@@ -4,7 +4,7 @@ use adw::{
 };
 use gtk::{
     Box as GtkBox, ColumnView, ColumnViewColumn, Orientation, StringList, Text, glib,
-    Adjustment, Button, DropDown
+    Adjustment, Button
 };
 
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
@@ -110,12 +110,13 @@ fn build_edit_window(edit_window_vsk: &GtkBox) {
     unit_menu_entry.set_title("Length"); // TODO: Split into 2 cells?
     unit_menu_entry.set_show_apply_button(true);
 
-    let options = ["Option 1", "Option 2", "Option 3"];
-    let unit_dropdown = DropDown::from_strings(&options);
-
     // Build length/unit stack. 
     unit_menu_hsk.append(&unit_menu_entry);
-    unit_menu_hsk.append(&unit_dropdown);
+    unit_menu_hsk.append(&ComboRow::builder()
+            .title("Select Units")
+            .model(&StringList::new(&[&"Unit 1", &"Unit 2", &"Unit 3"]))
+            .selected(0)
+            .build());
 
     // Build price entry
     let price_entry = EntryRow::new();
