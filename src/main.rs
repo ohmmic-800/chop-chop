@@ -1,18 +1,16 @@
-use adw::{
-    prelude::*, Application, ApplicationWindow, ComboRow, EntryRow, HeaderBar, 
-    OverlaySplitView, SpinRow, ViewStack, ViewSwitcher, ViewSwitcherPolicy,
-};
-use gtk::{
-    Box as GtkBox, ColumnView, ColumnViewColumn, Orientation, StringList, Text, glib,
-    Adjustment, Button, MenuButton,
-};
+mod window;
+
+use adw::Application;
+use adw::prelude::*;
+use gtk::{gio, glib};
+use window::Window;
 
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
 
-pub mod modeling;
-pub mod solvers;
-
 fn main() -> glib::ExitCode {
+    // Register and include resources
+    gio::resources_register_include!("resources.gresource").expect("Failed to register resources.");
+
     // Create a new application
     let app = Application::builder().application_id(APP_ID).build();
 
@@ -24,124 +22,7 @@ fn main() -> glib::ExitCode {
 }
 
 fn build_ui(app: &Application) {
-    // Build VStack for 'edit' window.
-    let edit_window_vsk = GtkBox::new(Orientation::Vertical, 25);
-    edit_window_vsk.set_width_request(250); // Needed to prevent multiline titles in edit window. 
-    build_edit_window(&edit_window_vsk);
-
-    // Build 'parent' HStack.
-    let parent_hsk = GtkBox::new(Orientation::Vertical, 10);
-    parent_hsk.append(&edit_window_vsk);
-
-    let materials_list = ColumnView::builder().build();
-    materials_list.append_column(&ColumnViewColumn::builder().title("Column 1").build());
-    materials_list.append_column(&ColumnViewColumn::builder().title("Column 2").build());
-    materials_list.append_column(&ColumnViewColumn::builder().title("Column 3").build());
-    // Need to use a ListItemFactory here?
-
-    let split_view_1 = OverlaySplitView::builder()
-        .content(&materials_list)
-        .sidebar(&parent_hsk)
-        .vexpand(true)
-        .min_sidebar_width(250.0)
-        .build();
-
-    let view_stack = ViewStack::new();
-
-    view_stack.add_titled_with_icon(&split_view_1, None, "Materials", "document-edit-symbolic");
-    view_stack.add_titled_with_icon(
-        &Text::builder().text("Parts page").build(),
-        None,
-        "Parts",
-        "emoji-body-symbolic",
-    );
-    let solver_sidebar = GtkBox::new(Orientation::Vertical, 10);
-    solver_sidebar.append(
-        &ComboRow::builder()
-            .title("Algorithm")
-            .subtitle("Optimization method")
-            .model(&StringList::new(&[&"Algo1", &"Algo2", &"Algo3"]))
-            .selected(0)
-            .build(),
-    );
-    let split_view_3 = OverlaySplitView::builder()
-        .content(&Text::builder().text("Solver content").build())
-        .sidebar(&solver_sidebar)
-        .vexpand(true)
-        .min_sidebar_width(250.0)
-        .build();
-    view_stack.add_titled_with_icon(&split_view_3, None, "Solver", "emote-love-symbolic");
-    let view_switcher = ViewSwitcher::builder()
-        .stack(&view_stack)
-        .policy(ViewSwitcherPolicy::Wide)
-        .build();
-
-    let header_bar = HeaderBar::builder().title_widget(&view_switcher).build();
-    let menu_button = MenuButton::builder()
-    .icon_name("open-menu-symbolic")
-    .build(); 
-    build_menu(&menu_button);
-
-    header_bar.pack_start(&menu_button);
-
-    // Build HStack to store Menu buttons.
-    let content = GtkBox::new(Orientation::Vertical, 0);
-    content.append(&header_bar);
-    content.append(&view_stack);
-
-    // Create a window
-    let window = ApplicationWindow::builder()
-        .application(app)
-        .title("Chop-Chop")
-        .content(&content)
-        .width_request(750)
-        .height_request(500)
-        .build();
-
-    // Present window
+    // Create new window and present it
+    let window = Window::new(app);
     window.present();
-}
-
-fn build_edit_window(edit_window_vsk: &GtkBox) {
-
-    // Build Quantity spin box
-    let adjustment = Adjustment::new(0.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
-    let quantity_row = SpinRow::new(Some(&adjustment), 1.0, 0);
-    quantity_row.set_title("Quantity");
-
-    // Build length entry row. 
-    let unit_menu_hsk = GtkBox::new(Orientation::Horizontal, 10);
-    let unit_menu_entry = EntryRow::new();
-    unit_menu_entry.set_title("Length"); // TODO: Split into 2 cells?
-    unit_menu_entry.set_show_apply_button(true);
-
-    // Build length/unit stack. 
-    unit_menu_hsk.append(&unit_menu_entry);
-    unit_menu_hsk.append(&ComboRow::builder()
-            .title("Select Units")
-            .model(&StringList::new(&[&"Unit 1", &"Unit 2", &"Unit 3"]))
-            .selected(0)
-            .build());
-
-    // Add items to the stack. 
-    edit_window_vsk.append(&EntryRow::builder()
-    .title("Description")
-    .show_apply_button(true)
-    .build());
-
-    edit_window_vsk.append(&quantity_row);
-    edit_window_vsk.append(&unit_menu_hsk);
-
-    edit_window_vsk.append(&EntryRow::builder()
-    .title("Price")
-    .show_apply_button(true)
-    .build());
-
-    edit_window_vsk.append(&Button::builder()
-    .label("Add")
-    .build());
-}
-
-fn build_menu(menu_button: &MenuButton) {
-    // TODO: Add item elements here. 
 }

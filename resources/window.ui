@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.10" />
+  <requires lib="libadwaita" version="1.4" />
+  <template class="ChopChopWindow" parent="AdwApplicationWindow">
+    <property name="default-width">800</property>
+    <property name="default-height">600</property>
+    <property name="title">Chop-Chop</property>
+    <child>
+      <object class="GtkBox" id="content">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="AdwHeaderBar" id="header">
+            <property name="title-widget">
+              <object class="AdwViewSwitcher">
+                <property name="stack">stack</property>
+                <property name="policy">wide</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwViewStack" id="stack">
+            <child>
+              <object class="AdwViewStackPage">
+                <property name="name">materials</property>
+                <property name="title">Materials</property>
+                <property name="icon-name">emoji-body-symbolic</property>
+                <property name="child">
+                  <object class="AdwOverlaySplitView">
+                    <property name="vexpand">true</property>
+                    <property name="min_sidebar_width">250</property>
+                    <property name="sidebar">
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="AdwEntryRow">
+                            <property name="title">Description</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwSpinRow">
+                            <property name="title">Quantity</property>
+                            <property name="adjustment">
+                              <object class="GtkAdjustment">
+                                <property name="lower">0</property>
+                                <property name="upper">100</property>
+                                <property name="value">1</property>
+                                <property name="page-increment">10</property>
+                                <property name="step-increment">1</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">horizontal</property>
+                            <child>
+                              <object class="AdwEntryRow">
+                                <property name="title">Length</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwComboRow">
+                                <property name="title">Select Units</property>
+                                <property name="model">
+                                  <object class="GtkStringList">
+                                    <items>
+                                      <item>Unit 1</item>
+                                      <item>Unit 2</item>
+                                      <item>Unit 3</item>
+                                    </items>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow">
+                            <property name="title">Price</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="label">Add</property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                    <property name="content">
+                      <object class="AdwStatusPage">
+                      <property name="title">Materials Page</property>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwViewStackPage">
+                <property name="name">parts</property>
+                <property name="title">Parts</property>
+                <property name="icon-name">emoji-body-symbolic</property>
+                <property name="child">
+                  <object class="AdwOverlaySplitView">
+                    <property name="vexpand">true</property>
+                    <property name="min_sidebar_width">250</property>
+                    <property name="sidebar">
+                      <object class="AdwStatusPage">
+                        <property name="title">Parts Sidebar</property>
+                      </object>
+                    </property>
+                    <property name="content">
+                      <object class="AdwStatusPage">
+                        <property name="title">Parts Page</property>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwViewStackPage">
+                <property name="name">solver</property>
+                <property name="title">Solver</property>
+                <property name="icon-name">emoji-body-symbolic</property>
+                <property name="child">
+                  <object class="AdwOverlaySplitView">
+                    <property name="vexpand">true</property>
+                    <property name="min_sidebar_width">250</property>
+                    <property name="sidebar">
+                      <object class="AdwStatusPage">
+                        <property name="title">Solver Sidebar</property>
+                      </object>
+                    </property>
+                    <property name="content">
+                      <object class="AdwStatusPage">
+                        <property name="title">Solver Page</property>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
