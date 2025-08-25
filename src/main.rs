@@ -94,11 +94,6 @@ fn build_ui(app: &Application) {
 }
 
 fn build_edit_window(edit_window_vsk: &GtkBox) {
-    // Build description entry. 
-    let description_entry = EntryRow::new();
-    description_entry.set_title("Description");
-    description_entry.set_show_apply_button(true);
-
     // Build Quantity spin box
     let adjustment = Adjustment::new(0.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
     let quantity_row = SpinRow::new(Some(&adjustment), 1.0, 0);
@@ -117,22 +112,24 @@ fn build_edit_window(edit_window_vsk: &GtkBox) {
             .model(&StringList::new(&[&"Unit 1", &"Unit 2", &"Unit 3"]))
             .selected(0)
             .build());
-
-    // Build price entry
-    let price_entry = EntryRow::new();
-    price_entry.set_title("Price(USD)");
-    price_entry.set_show_apply_button(true);
-
-    // Build add button. 
-    let add_button = Button::new();
-    add_button.set_label("Add");
-
+        
     // Add items to the stack. 
-    edit_window_vsk.append(&description_entry);
+    edit_window_vsk.append(&EntryRow::builder()
+    .title("Description")
+    .show_apply_button(true)
+    .build());
+
     edit_window_vsk.append(&quantity_row);
     edit_window_vsk.append(&unit_menu_hsk);
-    edit_window_vsk.append(&price_entry);
-    edit_window_vsk.append(&add_button);
+
+    edit_window_vsk.append(&EntryRow::builder()
+    .title("Price")
+    .show_apply_button(true)
+    .build());
+
+    edit_window_vsk.append(&Button::builder()
+    .label("Add")
+    .build());
 }
 
 
