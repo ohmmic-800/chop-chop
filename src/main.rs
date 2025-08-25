@@ -112,7 +112,7 @@ fn build_edit_window(edit_window_vsk: &GtkBox) {
             .model(&StringList::new(&[&"Unit 1", &"Unit 2", &"Unit 3"]))
             .selected(0)
             .build());
-        
+
     // Add items to the stack. 
     edit_window_vsk.append(&EntryRow::builder()
     .title("Description")
