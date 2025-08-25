@@ -4,7 +4,7 @@ use adw::{
 };
 use gtk::{
     Box as GtkBox, ColumnView, ColumnViewColumn, Orientation, StringList, Text, glib,
-    Adjustment, Button
+    Adjustment, Button, MenuButton
 };
 
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
@@ -45,7 +45,9 @@ fn build_ui(app: &Application) {
         .vexpand(true)
         .min_sidebar_width(250.0)
         .build();
+
     let view_stack = ViewStack::new();
+
     view_stack.add_titled_with_icon(&split_view_1, None, "Materials", "document-edit-symbolic");
     view_stack.add_titled_with_icon(
         &Text::builder().text("Parts page").build(),
@@ -73,7 +75,13 @@ fn build_ui(app: &Application) {
         .stack(&view_stack)
         .policy(ViewSwitcherPolicy::Wide)
         .build();
+
     let header_bar = HeaderBar::builder().title_widget(&view_switcher).build();
+    let menu_button = MenuButton::builder()
+    .icon_name("open-menu-symbolic")
+    .build(); 
+
+    header_bar.pack_start(&menu_button);
 
     // Build HStack to store Menu buttons.
     let content = GtkBox::new(Orientation::Vertical, 0);
