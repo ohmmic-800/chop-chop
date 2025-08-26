@@ -14,7 +14,7 @@
             <child type="start">
               <object class="GtkMenuButton" id="menu_button">
                 <property name="icon-name">open-menu-symbolic</property>
-<property name="tooltip-text">Main Menu</property>
+                <property name="tooltip-text">Main Menu</property>
                 <property name="primary">true</property>
                 <property name="menu-model">
                   <menu id="primary_menu">
@@ -58,37 +58,44 @@
                     <property name="sidebar">
                       <object class="GtkBox">
                         <property name="orientation">vertical</property>
-                        <property name="spacing">10</property>
+                        <property name="spacing">20</property>
+                        <property name="margin-start">20</property>
+                        <property name="margin-end">20</property>
+                        <property name="margin-top">20</property>
+                        <property name="margin-bottom">20</property>
                         <child>
-                          <object class="AdwEntryRow">
-                            <property name="title">Description</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="AdwSpinRow">
-                            <property name="title">Quantity</property>
-                            <property name="adjustment">
-                              <object class="GtkAdjustment">
-                                <property name="lower">0</property>
-                                <property name="upper">100</property>
-                                <property name="value">1</property>
-                                <property name="page-increment">10</property>
-                                <property name="step-increment">1</property>
-                              </object>
-                            </property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="orientation">horizontal</property>
+                          <object class="AdwPreferencesGroup">
                             <child>
                               <object class="AdwEntryRow">
-                                <property name="title">Length</property>
+                                <property name="title">Description</property>
                               </object>
                             </child>
                             <child>
+                              <object class="AdwSpinRow">
+                                <property name="title">Quantity</property>
+                                <property name="adjustment">
+                                  <object class="GtkAdjustment">
+                                    <property name="lower">0</property>
+                                    <property name="upper">100</property>
+                                    <property name="value">1</property>
+                                    <property name="page-increment">10</property>
+                                    <property name="step-increment">1</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow">
+                                <property name="title">Price</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <child>
                               <object class="AdwComboRow">
-                                <property name="title">Select Units</property>
+                                <property name="title">Length Unit</property>
                                 <property name="model">
                                   <object class="GtkStringList">
                                     <items>
@@ -100,23 +107,27 @@
                                 </property>
                               </object>
                             </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="AdwEntryRow">
-                            <property name="title">Price</property>
+                            <child>
+                              <object class="AdwEntryRow">
+                                <property name="title">Length</property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                         <child>
                           <object class="GtkButton">
                             <property name="label">Add</property>
+                            <style>
+                              <class name="pill" />
+                              <class name="suggested-action" />
+                            </style>
                           </object>
                         </child>
                       </object>
                     </property>
                     <property name="content">
                       <object class="AdwStatusPage">
-                      <property name="title">Materials Page</property>
+                        <property name="title">Materials Page</property>
                       </object>
                     </property>
                   </object>
