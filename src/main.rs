@@ -2,7 +2,7 @@ mod window;
 
 use adw::Application;
 use adw::prelude::*;
-use gtk::{gio, glib};
+use gtk::{Builder, gio, glib};
 use window::Window;
 
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
@@ -22,6 +22,8 @@ fn main() -> glib::ExitCode {
 }
 
 fn build_ui(app: &Application) {
+    let builder = Builder::from_file("../../resources/window.ui");
+
     // Create new window and present it
     let window = Window::new(app);
     window.present();
