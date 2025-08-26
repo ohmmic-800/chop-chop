@@ -15,8 +15,6 @@
             <child type="start">
               <object class="GtkMenuButton" id="menu_button">
                 <property name="icon-name">open-menu-symbolic</property>
-                <property name="direction">down</property>
-                <property name="halign">center</property>
                 <property name="menu-model">
                   <object class="GMenu"></object>
                 </property>
