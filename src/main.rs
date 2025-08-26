@@ -9,7 +9,7 @@ const APP_ID: &str = "com.ohmm-software.Chop-Chop";
 
 fn main() -> glib::ExitCode {
     // Register and include resources
-    gio::resources_register_include!("resources.gresource").expect("Failed to register resources.");
+    gio::resources_register_include!("gresource").expect("Failed to register resources.");
 
     // Create a new application
     let app = Application::builder().application_id(APP_ID).build();

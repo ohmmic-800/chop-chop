@@ -50,7 +50,7 @@
               <object class="AdwViewStackPage">
                 <property name="name">materials</property>
                 <property name="title">Materials</property>
-                <property name="icon-name">emoji-body-symbolic</property>
+                <property name="icon-name">build-symbolic</property>
                 <property name="child">
                   <object class="AdwOverlaySplitView">
                     <property name="vexpand">true</property>
@@ -138,7 +138,7 @@
               <object class="AdwViewStackPage">
                 <property name="name">parts</property>
                 <property name="title">Parts</property>
-                <property name="icon-name">emoji-body-symbolic</property>
+                <property name="icon-name">build-alt-symbolic</property>
                 <property name="child">
                   <object class="AdwOverlaySplitView">
                     <property name="vexpand">true</property>
@@ -161,7 +161,7 @@
               <object class="AdwViewStackPage">
                 <property name="name">solver</property>
                 <property name="title">Solver</property>
-                <property name="icon-name">emoji-body-symbolic</property>
+                <property name="icon-name">running-symbolic</property>
                 <property name="child">
                   <object class="AdwOverlaySplitView">
                     <property name="vexpand">true</property>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/ohmm-software/Chop-Chop/">
+    <file preprocess="xml-stripblanks">window.ui</file>
+  </gresource>
+  <gresource prefix="/com/ohmm-software/Chop-Chop/icons/scalable/actions/">
+    <file preprocess="xml-stripblanks">build-alt-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">build-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">running-symbolic.svg</file>
+  </gresource>
+</gresources>
