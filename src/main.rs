@@ -1,9 +1,9 @@
-mod window;
+mod ui;
 
 use adw::Application;
 use adw::prelude::*;
 use gtk::{gio, glib};
-use window::Window;
+use ui::window::Window;
 
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
 
