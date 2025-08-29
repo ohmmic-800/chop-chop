@@ -11,6 +11,8 @@ mod imp {
     #[template(resource = "/com/ohmm-software/Chop-Chop/overlay.ui")]
     pub struct Overlay {
         #[template_child]
+        pub progress_bar: TemplateChild<gtk::ProgressBar>,
+        #[template_child]
         pub cancel_button: TemplateChild<gtk::Button>,
     }
 
@@ -56,6 +58,10 @@ glib::wrapper! {
 impl Overlay {
     pub fn new() -> Self {
         Object::builder().build()
+    }
+
+    pub fn update_progress(&self, progress: f64) {
+        self.imp().progress_bar.set_fraction(progress);
     }
 
     fn setup_callbacks(&self) {

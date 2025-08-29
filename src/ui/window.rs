@@ -1,4 +1,6 @@
 use std::cell::RefCell;
+use std::thread;
+use std::time::Duration;
 
 use adw::prelude::*;
 use adw::subclass::prelude::*;
@@ -97,11 +99,38 @@ impl Window {
         Object::builder().property("application", app).build()
     }
 
+    // https://gtk-rs.org/gtk4-rs/git/book/main_event_loop.html#channels
     fn run_solver(&self) {
-        let dialog = Overlay::new();
-        dialog.set_can_close(false);
-        dialog.present(Some(self));
-        // TODO: Start a worker thread, call dialog.force_close() when done
+        let overlay = Overlay::new();
+        overlay.set_can_close(false);
+        overlay.present(Some(self));
+
+        let (sender, receiver) = async_channel::bounded(1);
+
+        // TODO: Replace this with the actual solver logic
+        // TODO: Pass solvers a progress callback
+        gio::spawn_blocking(move || {
+            let t = 10;
+            for i in 0..t {
+                let progress = (i as f64) / (t as f64);
+                sender.send_blocking(progress).expect("Channel closed");
+                thread::sleep(Duration::from_secs(1));
+            }
+            sender.send_blocking(1.0).expect("Channel closed");
+        });
+
+        glib::spawn_future_local(clone!(
+            #[weak]
+            overlay,
+            async move {
+                while let Ok(progress) = receiver.recv().await {
+                    overlay.update_progress(progress);
+                    if progress == 1.0 {
+                        overlay.force_close();
+                    }
+                }
+            }
+        ));
     }
 
     // TODO: Reduce duplicate code

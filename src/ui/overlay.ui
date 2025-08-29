@@ -15,7 +15,13 @@
         <property name="margin-bottom">20</property>
         <child>
           <object class="AdwStatusPage">
-            <property name="title">Solver progress...</property>
+            <property name="title">Running solver...</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="progress_bar">
+            <property name="margin-start">40</property>
+            <property name="margin-end">40</property>
           </object>
         </child>
         <child>
