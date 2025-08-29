@@ -72,14 +72,12 @@ impl Solver for NaiveSolver {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modeling::{Material, Substance};
+    use crate::modeling::Material;
 
     #[test]
     fn test_naive_solver() {
         // TODO: Is .clone() the right way to do this?
-        let substance = Substance {
-            name: String::from("Pine 2x4"),
-        };
+        let substance = String::from("Pine 2x4");
         let material = Material {
             substance: substance.clone(),
             length: 8.0,

@@ -1,13 +1,3 @@
-/// A type of material
-///
-/// Examples:
-/// - Pine 2x4
-/// - Green yarn
-#[derive(Clone, Debug, PartialEq)]
-pub struct Substance {
-    pub name: String,
-}
-
 /// A substance available at a specific dimension
 ///
 /// Assumed to be 1D for now
@@ -17,7 +7,7 @@ pub struct Substance {
 /// - 100-meter spoon of green yarn
 #[derive(Clone, Debug)]
 pub struct Material {
-    pub substance: Substance,
+    pub substance: String,
     pub length: f32,
 }
 
@@ -42,7 +32,7 @@ pub struct Supply {
 /// Assumed 1D for now
 #[derive(Debug)]
 pub struct Part {
-    pub substance: Substance,
+    pub substance: String,
     pub length: f32,
     pub quantity: u32,
 }

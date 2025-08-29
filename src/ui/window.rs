@@ -1,10 +1,11 @@
-use crate::ui::materials_object::MaterialObject;
+use std::cell::RefCell;
+
 use adw::prelude::*;
 use adw::subclass::prelude::*;
-use glib::subclass::InitializingObject;
-use glib::{Object, clone};
-use gtk::{CompositeTemplate, gio, glib, prelude::ButtonExt};
-use std::cell::RefCell;
+use gtk::glib::{Object, clone, subclass::InitializingObject};
+use gtk::{CompositeTemplate, gio, glib};
+
+use super::supply::SupplyGObject;
 
 mod imp {
     use super::*;
@@ -13,55 +14,53 @@ mod imp {
     #[derive(CompositeTemplate, Default)]
     #[template(resource = "/com/ohmm-software/Chop-Chop/window.ui")]
     pub struct Window {
+        // References to child widgets
         #[template_child]
-        pub description_entry: TemplateChild<adw::EntryRow>,
-
+        pub name_field: TemplateChild<adw::EntryRow>,
         #[template_child]
-        pub quantity_spin: TemplateChild<adw::SpinRow>,
-
+        pub substance_field: TemplateChild<adw::EntryRow>,
         #[template_child]
-        pub price_entry: TemplateChild<adw::EntryRow>,
-
+        pub price_field: TemplateChild<adw::EntryRow>,
         #[template_child]
-        pub length_unit_combo: TemplateChild<adw::ComboRow>,
-
+        pub max_quantity_field: TemplateChild<adw::SpinRow>,
         #[template_child]
-        pub length_entry: TemplateChild<adw::EntryRow>,
-
+        pub length_unit_field: TemplateChild<adw::ComboRow>,
+        #[template_child]
+        pub length_field: TemplateChild<adw::EntryRow>,
         #[template_child]
         pub add_button: TemplateChild<gtk::Button>,
-
         #[template_child]
-        pub materials_list: TemplateChild<gtk::ListBox>,
+        pub supplies_view: TemplateChild<gtk::ColumnView>,
 
-        pub materials: RefCell<Option<gio::ListStore>>,
+        // Model (data store) for the supply data
+        pub supplies: RefCell<Option<gio::ListStore>>,
     }
 
     // The central trait for subclassing a GObject
     #[glib::object_subclass]
     impl ObjectSubclass for Window {
-        // `NAME` needs to match `class` attribute of template
         const NAME: &'static str = "ChopChopWindow";
         type Type = super::Window;
         type ParentType = adw::ApplicationWindow;
 
         fn class_init(klass: &mut Self::Class) {
+            // Required for CompositeTemplate
             klass.bind_template();
         }
 
         fn instance_init(obj: &InitializingObject<Self>) {
+            // Required for CompositeTemplate
             obj.init_template();
         }
     }
 
     // Trait shared by all GObjects
     impl ObjectImpl for Window {
+        // Called when the object is constructed
         fn constructed(&self) {
-            // Call "constructed" on parent
             self.parent_constructed();
-
             let obj = self.obj();
-            obj.setup_materials();
+            obj.setup_supplies();
             obj.setup_callbacks();
         }
     }
@@ -88,63 +87,149 @@ glib::wrapper! {
 
 impl Window {
     pub fn new(app: &adw::Application) -> Self {
-        // Create new window
         Object::builder().property("application", app).build()
     }
 
-    fn materials(&self) -> gio::ListStore {
-        self.imp()
-            .materials
-            .borrow()
-            .clone()
-            .expect("Could not get current materials.")
+    fn supplies(&self) -> gio::ListStore {
+        self.imp().supplies.borrow().clone().unwrap()
     }
 
-    fn setup_materials(&self) {
-        // Create new model
-        let model = gio::ListStore::new::<MaterialObject>();
+    // TODO: Reduce duplicate code
+    fn setup_supplies(&self) {
+        // Create the list model and link it to the column view
+        let model = Some(gio::ListStore::new::<SupplyGObject>());
+        self.imp().supplies.replace(model);
+        let supplies_view = &self.imp().supplies_view;
+        let selection = gtk::SingleSelection::new(Some(self.supplies()));
+        supplies_view.set_model(Some(&selection));
 
-        // Set model
-        self.imp().materials.replace(Some(model.clone()));
+        // Create a factory for each column
+        let name_factory = gtk::SignalListItemFactory::new();
+        let substance_factory = gtk::SignalListItemFactory::new();
+        let max_quantity_factory = gtk::SignalListItemFactory::new();
+        let price_factory = gtk::SignalListItemFactory::new();
+        let length_unit_factory = gtk::SignalListItemFactory::new();
+        let length_factory = gtk::SignalListItemFactory::new();
 
-        // Wrap model selection and pass it to the list box
-        let selection_model = gtk::NoSelection::new(Some(self.materials()));
-        self.imp().materials_list.bind_model(
-            Some(&selection_model),
-            clone!(
-                #[weak(rename_to = window)]
-                self,
-                #[upgrade_or_panic]
-                move |obj| {
-                    let material_object = obj
-                        .downcast_ref()
-                        .expect("The object should be of type `MaterialObject`.");
-                    let row = window.create_material_row(material_object);
-                    row.upcast()
-                }
-            ),
+        // Callback invoked when a new row widget is created
+        name_factory.connect_setup(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let label = gtk::Label::new(None);
+            label.set_halign(gtk::Align::Start);
+            list_item.set_child(Some(&label));
+        });
+        substance_factory.connect_setup(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let label = gtk::Label::new(None);
+            label.set_halign(gtk::Align::Start);
+            list_item.set_child(Some(&label));
+        });
+        max_quantity_factory.connect_setup(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let label = gtk::Label::new(None);
+            label.set_halign(gtk::Align::Start);
+            list_item.set_child(Some(&label));
+        });
+        price_factory.connect_setup(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let label = gtk::Label::new(None);
+            label.set_halign(gtk::Align::Start);
+            list_item.set_child(Some(&label));
+        });
+        length_unit_factory.connect_setup(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let label = gtk::Label::new(None);
+            label.set_halign(gtk::Align::Start);
+            list_item.set_child(Some(&label));
+        });
+        length_factory.connect_setup(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let label = gtk::Label::new(None);
+            label.set_halign(gtk::Align::Start);
+            list_item.set_child(Some(&label));
+        });
+
+        // Callbacks invoked when an item in the model needs to be bound to a widget
+        name_factory.connect_bind(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
+            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+            label.set_label(&supply_object.name());
+        });
+        substance_factory.connect_bind(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
+            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+            label.set_label(&supply_object.substance());
+        });
+        price_factory.connect_bind(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
+            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+            label.set_label(&supply_object.price().to_string());
+        });
+        max_quantity_factory.connect_bind(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
+            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+            label.set_label(&supply_object.max_quantity().to_string());
+        });
+        length_unit_factory.connect_bind(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
+            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+            label.set_label(&supply_object.length_unit());
+        });
+        length_factory.connect_bind(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
+            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+            label.set_label(&supply_object.length().to_string());
+        });
+
+        // Add columns to the view
+        supplies_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Name")
+                .expand(true)
+                .factory(&name_factory)
+                .build(),
         );
-    }
-
-    fn create_material_row(&self, material_object: &MaterialObject) -> adw::ActionRow {
-        let row = adw::ActionRow::builder().build();
-        let row_box = gtk::Box::builder()
-            .orientation(gtk::Orientation::Horizontal)
-            .spacing(10)
-            .build();
-        row.add_prefix(&row_box);
-        row_box.append(&gtk::Label::new(Some(&material_object.description())));
-        row_box.append(&gtk::Label::new(Some(
-            &material_object.quantity().to_string(),
-        )));
-        row_box.append(&gtk::Label::new(Some(&material_object.price().to_string())));
-        row_box.append(&gtk::Label::new(Some(
-            &material_object.length().to_string(),
-        )));
-        row_box.append(&gtk::Label::new(Some(
-            &material_object.length_unit().to_string(),
-        )));
-        row
+        supplies_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Substance")
+                .expand(true)
+                .factory(&substance_factory)
+                .build(),
+        );
+        supplies_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Price")
+                .expand(true)
+                .factory(&price_factory)
+                .build(),
+        );
+        supplies_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Quantity")
+                .expand(true)
+                .factory(&max_quantity_factory)
+                .build(),
+        );
+        supplies_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Unit")
+                .expand(true)
+                .factory(&length_unit_factory)
+                .build(),
+        );
+        supplies_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Length")
+                .expand(true)
+                .factory(&length_factory)
+                .build(),
+        );
     }
 
     fn setup_callbacks(&self) {
@@ -153,26 +238,29 @@ impl Window {
             #[weak(rename_to = window)]
             self,
             move |_| {
-                window.new_material();
+                window.new_supply();
             }
         ));
     }
 
-    fn new_material(&self) {
-        let imp = self.imp();
-        let material = MaterialObject::new(
-            imp.description_entry.text().to_string(),
-            imp.quantity_spin.value() as u32,
-            imp.price_entry.text().parse().unwrap(),
-            // TODO: There has to be a better way to do this...
-            String::from(match imp.length_unit_combo.selected() {
-                0 => "Inches",
-                1 => "Centimeters",
-                2 => "Meters",
-                _ => panic!(),
-            }),
-            imp.length_entry.text().parse().unwrap(),
+    fn new_supply(&self) {
+        // TODO: Get string directly from the combo box?
+        let length_unit = String::from(match self.imp().length_unit_field.selected() {
+            0 => "Inches",
+            1 => "Centimeters",
+            2 => "Meters",
+            _ => panic!(),
+        });
+
+        // TODO: Improve invalid float handling
+        let supply = SupplyGObject::new(
+            self.imp().name_field.text().to_string(),
+            self.imp().substance_field.text().to_string(),
+            self.imp().price_field.text().parse().unwrap_or(0.0),
+            self.imp().max_quantity_field.value() as u32,
+            length_unit,
+            self.imp().length_field.text().parse().unwrap_or(1.0),
         );
-        self.materials().append(&material);
+        self.supplies().append(&supply);
     }
 }
