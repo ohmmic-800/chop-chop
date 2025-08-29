@@ -66,12 +66,12 @@
                         <child>
                           <object class="AdwPreferencesGroup">
                             <child>
-                              <object class="AdwEntryRow">
+                              <object class="AdwEntryRow" id="description_entry">
                                 <property name="title">Description</property>
                               </object>
                             </child>
                             <child>
-                              <object class="AdwSpinRow">
+                              <object class="AdwSpinRow" id="quantity_spin">
                                 <property name="title">Quantity</property>
                                 <property name="adjustment">
                                   <object class="GtkAdjustment">
@@ -85,7 +85,7 @@
                               </object>
                             </child>
                             <child>
-                              <object class="AdwEntryRow">
+                              <object class="AdwEntryRow" id="price_entry">
                                 <property name="title">Price</property>
                               </object>
                             </child>
@@ -94,28 +94,28 @@
                         <child>
                           <object class="AdwPreferencesGroup">
                             <child>
-                              <object class="AdwComboRow">
-                                <property name="title">Length Unit</property>
+                              <object class="AdwComboRow" id="length_unit_combo">
+                                <property name="title">Unit</property>
                                 <property name="model">
                                   <object class="GtkStringList">
                                     <items>
-                                      <item>Unit 1</item>
-                                      <item>Unit 2</item>
-                                      <item>Unit 3</item>
+                                      <item>Inches</item>
+                                      <item>Centimeters</item>
+                                      <item>Meters</item>
                                     </items>
                                   </object>
                                 </property>
                               </object>
                             </child>
                             <child>
-                              <object class="AdwEntryRow">
+                              <object class="AdwEntryRow" id="length_entry">
                                 <property name="title">Length</property>
                               </object>
                             </child>
                           </object>
                         </child>
                         <child>
-                          <object class="GtkButton">
+                          <object class="GtkButton" id="add_button">
                             <property name="label">Add</property>
                             <style>
                               <class name="pill" />
@@ -126,8 +126,15 @@
                       </object>
                     </property>
                     <property name="content">
-                      <object class="AdwStatusPage">
-                        <property name="title">Materials Page</property>
+                      <object class="GtkScrolledWindow">
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="min-content-height">360</property>
+                        <property name="vexpand">true</property>
+                        <child>
+                          <object class="GtkListBox" id="materials_list">
+                            <property name="valign">start</property>
+                          </object>
+                        </child>
                       </object>
                     </property>
                   </object>
