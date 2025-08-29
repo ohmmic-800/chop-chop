@@ -71,8 +71,8 @@
                               </object>
                             </child>
                             <child>
-                              <object class="AdwEntryRow" id="substance_field">
-                                <property name="title">Substance</property>
+                              <object class="AdwEntryRow" id="material_field">
+                                <property name="title">Material</property>
                               </object>
                             </child>
                             <child>

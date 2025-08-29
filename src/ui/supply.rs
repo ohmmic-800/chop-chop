@@ -10,7 +10,7 @@ use std::cell::RefCell;
 #[derive(Default)]
 pub struct SupplyData {
     pub name: String,
-    pub substance: String,
+    pub material: String,
     pub price: f32,
     pub max_quantity: u32,
     pub length_unit: String,
@@ -27,7 +27,7 @@ mod imp {
     #[properties(wrapper_type = super::SupplyGObject)]
     pub struct SupplyGObject {
         #[property(name = "name", get, set, type = String, member = name)]
-        #[property(name = "substance", get, set, type = String, member = substance)]
+        #[property(name = "material", get, set, type = String, member = material)]
         #[property(name = "price", get, set, type = f32, member = price)]
         #[property(name = "max-quantity", get, set, type = u32, member = max_quantity)]
         #[property(name = "length-unit", get, set, type = String, member = length_unit)]
@@ -54,7 +54,7 @@ glib::wrapper! {
 impl SupplyGObject {
     pub fn new(
         name: String,
-        substance: String,
+        material: String,
         price: f32,
         max_quantity: u32,
         length_unit: String,
@@ -62,7 +62,7 @@ impl SupplyGObject {
     ) -> Self {
         Object::builder()
             .property("name", name)
-            .property("substance", substance)
+            .property("material", material)
             .property("price", price)
             .property("max-quantity", max_quantity)
             .property("length_unit", length_unit)

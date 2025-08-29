@@ -19,7 +19,7 @@ mod imp {
         #[template_child]
         pub name_field: TemplateChild<adw::EntryRow>,
         #[template_child]
-        pub substance_field: TemplateChild<adw::EntryRow>,
+        pub material_field: TemplateChild<adw::EntryRow>,
         #[template_child]
         pub price_field: TemplateChild<adw::EntryRow>,
         #[template_child]
@@ -115,7 +115,7 @@ impl Window {
 
         // Create a factory for each column
         let name_factory = gtk::SignalListItemFactory::new();
-        let substance_factory = gtk::SignalListItemFactory::new();
+        let material_factory = gtk::SignalListItemFactory::new();
         let max_quantity_factory = gtk::SignalListItemFactory::new();
         let price_factory = gtk::SignalListItemFactory::new();
         let length_unit_factory = gtk::SignalListItemFactory::new();
@@ -128,7 +128,7 @@ impl Window {
             label.set_halign(gtk::Align::Start);
             list_item.set_child(Some(&label));
         });
-        substance_factory.connect_setup(move |_, list_item| {
+        material_factory.connect_setup(move |_, list_item| {
             let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
             let label = gtk::Label::new(None);
             label.set_halign(gtk::Align::Start);
@@ -166,11 +166,11 @@ impl Window {
             let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
             label.set_label(&supply_object.name());
         });
-        substance_factory.connect_bind(move |_, list_item| {
+        material_factory.connect_bind(move |_, list_item| {
             let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
             let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
             let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            label.set_label(&supply_object.substance());
+            label.set_label(&supply_object.material());
         });
         price_factory.connect_bind(move |_, list_item| {
             let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
@@ -207,9 +207,9 @@ impl Window {
         );
         supplies_view.append_column(
             &gtk::ColumnViewColumn::builder()
-                .title("Substance")
+                .title("Material")
                 .expand(true)
-                .factory(&substance_factory)
+                .factory(&material_factory)
                 .build(),
         );
         supplies_view.append_column(
@@ -278,7 +278,7 @@ impl Window {
         // TODO: Improve invalid float handling
         let supply = SupplyGObject::new(
             self.imp().name_field.text().to_string(),
-            self.imp().substance_field.text().to_string(),
+            self.imp().material_field.text().to_string(),
             self.imp().price_field.text().parse().unwrap_or(0.0),
             self.imp().max_quantity_field.value() as u32,
             length_unit,
