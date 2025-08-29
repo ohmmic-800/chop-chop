@@ -5,6 +5,7 @@ use adw::subclass::prelude::*;
 use gtk::glib::{Object, clone, subclass::InitializingObject};
 use gtk::{CompositeTemplate, gio, glib};
 
+use super::overlay::Overlay;
 use super::supply::SupplyGObject;
 
 mod imp {
@@ -14,7 +15,7 @@ mod imp {
     #[derive(CompositeTemplate, Default)]
     #[template(resource = "/com/ohmm-software/Chop-Chop/window.ui")]
     pub struct Window {
-        // References to child widgets
+        // References to widgets in the supplies pane
         #[template_child]
         pub name_field: TemplateChild<adw::EntryRow>,
         #[template_child]
@@ -31,6 +32,12 @@ mod imp {
         pub add_button: TemplateChild<gtk::Button>,
         #[template_child]
         pub supplies_view: TemplateChild<gtk::ColumnView>,
+
+        // References to widgets in the solver pane
+        #[template_child]
+        pub solver_field: TemplateChild<adw::ComboRow>,
+        #[template_child]
+        pub run_button: TemplateChild<gtk::Button>,
 
         // Model (data store) for the supply data
         pub supplies: RefCell<Option<gio::ListStore>>,
@@ -90,8 +97,11 @@ impl Window {
         Object::builder().property("application", app).build()
     }
 
-    fn supplies(&self) -> gio::ListStore {
-        self.imp().supplies.borrow().clone().unwrap()
+    fn run_solver(&self) {
+        let dialog = Overlay::new();
+        dialog.set_can_close(false);
+        dialog.present(Some(self));
+        // TODO: Start a worker thread, call dialog.force_close() when done
     }
 
     // TODO: Reduce duplicate code
@@ -111,7 +121,7 @@ impl Window {
         let length_unit_factory = gtk::SignalListItemFactory::new();
         let length_factory = gtk::SignalListItemFactory::new();
 
-        // Callback invoked when a new row widget is created
+        // Callbacks invoked when a new widget needs to be created
         name_factory.connect_setup(move |_, list_item| {
             let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
             let label = gtk::Label::new(None);
@@ -233,7 +243,7 @@ impl Window {
     }
 
     fn setup_callbacks(&self) {
-        // Setup callback for clicking the add button
+        // Set up callback for clicking the add button
         self.imp().add_button.connect_clicked(clone!(
             #[weak(rename_to = window)]
             self,
@@ -241,6 +251,19 @@ impl Window {
                 window.new_supply();
             }
         ));
+
+        // Set up callback for clicking the run button
+        self.imp().run_button.connect_clicked(clone!(
+            #[weak(rename_to = window)]
+            self,
+            move |_| {
+                window.run_solver();
+            }
+        ));
+    }
+
+    fn supplies(&self) -> gio::ListStore {
+        self.imp().supplies.borrow().clone().unwrap()
     }
 
     fn new_supply(&self) {

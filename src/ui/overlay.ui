@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.10" />
+  <requires lib="libadwaita" version="1.4" />
+  <template class="ChopChopOverlay" parent="AdwDialog">
+    <property name="content-width">400</property>
+    <property name="content-height">250</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">20</property>
+        <property name="margin-start">20</property>
+        <property name="margin-end">20</property>
+        <property name="margin-top">20</property>
+        <property name="margin-bottom">20</property>
+        <child>
+          <object class="AdwStatusPage">
+            <property name="title">Solver progress...</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="cancel_button">
+            <property name="label">Cancel</property>
+            <property name="margin-start">40</property>
+            <property name="margin-end">40</property>
+            <style>
+              <class name="pill" />
+              <class name="destructive-action" />
+            </style>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

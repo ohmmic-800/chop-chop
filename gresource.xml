@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/ohmm-software/Chop-Chop/">
+    <file preprocess="xml-stripblanks">overlay.ui</file>
     <file preprocess="xml-stripblanks">window.ui</file>
-    
-    <!-- https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/struct.Application.html#automatic-resources -->
+
+    <!--
+    https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/struct.Application.html#automatic-resources
+    -->
     <file preprocess="xml-stripblanks" alias="gtk/help-overlay.ui">shortcuts.ui</file>
   </gresource>
   <gresource prefix="/com/ohmm-software/Chop-Chop/icons/scalable/actions/">
