@@ -154,13 +154,88 @@
                     <property name="vexpand">true</property>
                     <property name="min_sidebar_width">300</property>
                     <property name="sidebar">
-                      <object class="AdwStatusPage">
-                        <property name="title">Parts Sidebar</property>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">20</property>
+                        <property name="margin-start">20</property>
+                        <property name="margin-end">20</property>
+                        <property name="margin-top">20</property>
+                        <property name="margin-bottom">20</property>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <child>
+                              <object class="AdwEntryRow" id="parts_name_field">
+                                <property name="title">Name</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="parts_material_field">
+                                <property name="title">Material</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="parts_price_field">
+                                <property name="title">Price</property>
+                                <property name="text">0.00</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwSpinRow" id="parts_max_quantity_field">
+                                <property name="title">Quantity</property>
+                                <property name="subtitle">Zero for unlimited</property>
+                                <property name="adjustment">
+                                  <object class="GtkAdjustment">
+                                    <property name="lower">0</property>
+                                    <property name="upper">100</property>
+                                    <property name="value">0</property>
+                                    <property name="page-increment">10</property>
+                                    <property name="step-increment">1</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <child>
+                              <object class="AdwComboRow" id="parts_length_unit_field">
+                                <property name="title">Unit</property>
+                                <property name="model">
+                                  <object class="GtkStringList">
+                                    <items>
+                                      <item>Inches</item>
+                                      <item>Centimeters</item>
+                                      <item>Meters</item>
+                                    </items>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="parts_length_field">
+                                <property name="title">Length</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="parts_add_button">
+                            <property name="label">Add</property>
+                            <style>
+                              <class name="pill" />
+                              <class name="suggested-action" />
+                            </style>
+                          </object>
+                        </child>
                       </object>
                     </property>
                     <property name="content">
-                      <object class="AdwStatusPage">
-                        <property name="title">Parts Page</property>
+                      <object class="GtkScrolledWindow">
+                        <property name="hscrollbar-policy">never</property>
+                        <child>
+                          <object class="GtkColumnView" id="parts_supplies_view"></object>
+                        </child>
                       </object>
                     </property>
                   </object>
