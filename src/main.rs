@@ -2,8 +2,7 @@ mod ui;
 
 use adw::Application;
 use adw::prelude::*;
-use gtk::{gio, glib};
-
+use gtk::{CssProvider, gdk::Display, gio, glib};
 use ui::window::Window;
 
 const APP_ID: &str = "com.ohmm-software.Chop-Chop";
@@ -16,6 +15,7 @@ fn main() -> glib::ExitCode {
     let app = Application::builder().application_id(APP_ID).build();
 
     // Connect to "activate" signal of `app`
+    app.connect_startup(|_| load_css());
     app.connect_activate(build_ui);
 
     // Run the application
@@ -26,4 +26,17 @@ fn build_ui(app: &Application) {
     // Create new window and present it
     let window = Window::new(app);
     window.present();
+}
+
+fn load_css() {
+    // Load the CSS file and add it to the provider
+    let provider = CssProvider::new();
+    provider.load_from_string(include_str!("styles/style.css"));
+
+    // Add the provider to the default screen
+    gtk::style_context_add_provider_for_display(
+        &Display::default().expect("Could not connect to a display."),
+        &provider,
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+    );
 }
