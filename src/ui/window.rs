@@ -35,6 +35,24 @@ mod imp {
         #[template_child]
         pub supplies_view: TemplateChild<gtk::ColumnView>,
 
+        // Reference to widgets in the parts pane
+        #[template_child]
+        pub parts_name_field: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub parts_material_field: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub parts_price_field: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub parts_max_quantity_field: TemplateChild<adw::SpinRow>,
+        #[template_child]
+        pub parts_length_unit_field: TemplateChild<adw::ComboRow>,
+        #[template_child]
+        pub parts_length_field: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub parts_add_button: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub parts_supplies_view: TemplateChild<gtk::ColumnView>,
+
         // References to widgets in the solver pane
         #[template_child]
         pub solver_field: TemplateChild<adw::ComboRow>,
