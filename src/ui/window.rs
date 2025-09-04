@@ -8,6 +8,7 @@ use gtk::glib::{Object, clone, subclass::InitializingObject};
 use gtk::{ColumnView, CompositeTemplate, gio, glib};
 
 use super::overlay::Overlay;
+use super::parts::PartGObject;
 use super::supply::SupplyGObject;
 
 mod imp {
