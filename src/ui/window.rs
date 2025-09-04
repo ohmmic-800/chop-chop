@@ -293,7 +293,7 @@ impl Window {
         self.imp().parts.borrow().clone().unwrap()
     }
 
-    // TODO: Find a way to combine new_supply and new_parts_supply methods.
+    // TODO: Find a way to combine new_supply and new_parts_supply methods.x
     fn new_supply(&self) {
         // TODO: Get string directly from the combo box?
         let length_unit = String::from(match self.imp().length_unit_field.selected() {
