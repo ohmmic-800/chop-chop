@@ -5,7 +5,7 @@ use std::time::Duration;
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::glib::{Object, clone, subclass::InitializingObject};
-use gtk::{CompositeTemplate, gio, glib};
+use gtk::{ColumnView, CompositeTemplate, gio, glib};
 
 use super::overlay::Overlay;
 use super::supply::SupplyGObject;
@@ -152,6 +152,23 @@ impl Window {
         ));
     }
 
+    // Appends a column to a list_model.
+    fn append_column_to_list_model(
+        &self,
+        list_model: &TemplateChild<ColumnView>,
+        title: &str,
+        factory: &impl IsA<gtk::ListItemFactory>,
+    ) {
+        // Add columns to the view
+        list_model.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title(title)
+                .expand(true)
+                .factory(factory)
+                .build(),
+        );
+    }
+
     // TODO: Reduce duplicate code
     fn setup_supplies(&self) {
         // Create the list model and link it to the column view
@@ -252,93 +269,21 @@ impl Window {
             label.set_label(&supply_object.length().to_string());
         });
 
-        // Add columns to the view
-        supplies_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Name")
-                .expand(true)
-                .factory(&name_factory)
-                .build(),
-        );
-        supplies_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Material")
-                .expand(true)
-                .factory(&material_factory)
-                .build(),
-        );
-        supplies_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Price")
-                .expand(true)
-                .factory(&price_factory)
-                .build(),
-        );
-        supplies_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Quantity")
-                .expand(true)
-                .factory(&max_quantity_factory)
-                .build(),
-        );
-        supplies_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Unit")
-                .expand(true)
-                .factory(&length_unit_factory)
-                .build(),
-        );
-        supplies_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Length")
-                .expand(true)
-                .factory(&length_factory)
-                .build(),
-        );
+        // // Add columns to the supplies view
+        self.append_column_to_list_model(&supplies_view, "Name", &name_factory);
+        self.append_column_to_list_model(&supplies_view, "Material", &material_factory);
+        self.append_column_to_list_model(&supplies_view, "Price", &price_factory);
+        self.append_column_to_list_model(&supplies_view, "Quantity", &max_quantity_factory);
+        self.append_column_to_list_model(&supplies_view, "Unit", &length_unit_factory);
+        self.append_column_to_list_model(&supplies_view, "Length", &length_factory);
 
         // Add columns to the parts view
-        parts_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Name")
-                .expand(true)
-                .factory(&name_factory)
-                .build(),
-        );
-        parts_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Material")
-                .expand(true)
-                .factory(&material_factory)
-                .build(),
-        );
-        parts_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Price")
-                .expand(true)
-                .factory(&price_factory)
-                .build(),
-        );
-        parts_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Quantity")
-                .expand(true)
-                .factory(&max_quantity_factory)
-                .build(),
-        );
-        parts_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Unit")
-                .expand(true)
-                .factory(&length_unit_factory)
-                .build(),
-        );
-        parts_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title("Length")
-                .expand(true)
-                .factory(&length_factory)
-                .build(),
-        );
+        self.append_column_to_list_model(&parts_view, "Name", &name_factory);
+        self.append_column_to_list_model(&parts_view, "Material", &material_factory);
+        self.append_column_to_list_model(&parts_view, "Price", &price_factory);
+        self.append_column_to_list_model(&parts_view, "Quantity", &max_quantity_factory);
+        self.append_column_to_list_model(&parts_view, "Unit", &length_unit_factory);
+        self.append_column_to_list_model(&parts_view, "Length", &length_factory);
     }
 
     fn setup_callbacks(&self) {
