@@ -1,3 +1,11 @@
 button {
-    color: purple;
+    color: rgb(147, 102, 20);
+}
+
+.adw-entry-row {
+    color: beige;
+}
+
+.add_button {
+    background-color: beige
 }
