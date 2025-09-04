@@ -178,6 +178,28 @@ impl Window {
         });
     }
 
+    fn factory_connect_bind(
+        &self,
+        factory: &gtk::SignalListItemFactory,
+        factory_type: FactoryType,
+    ) {
+        factory.connect_bind(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
+            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+            match factory_type {
+                FactoryType::NameFactory => label.set_label(&supply_object.name()),
+                FactoryType::MaterialFactory => label.set_label(&supply_object.material()),
+                FactoryType::PriceFactory => label.set_label(&supply_object.price().to_string()),
+                FactoryType::MaxQuantityFactory => {
+                    label.set_label(&supply_object.max_quantity().to_string())
+                }
+                FactoryType::LengthUnitFactory => label.set_label(&supply_object.length_unit()),
+                FactoryType::LengthFactory => label.set_label(&supply_object.length().to_string()),
+            }
+        });
+    }
+
     // TODO: Reduce duplicate code
     fn setup_supplies(&self) {
         // Create the list model and link it to the column view
@@ -211,42 +233,12 @@ impl Window {
         self.factory_connect_setup(&length_factory);
 
         // Callbacks invoked when an item in the model needs to be bound to a widget
-        name_factory.connect_bind(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
-            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            label.set_label(&supply_object.name());
-        });
-        material_factory.connect_bind(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
-            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            label.set_label(&supply_object.material());
-        });
-        price_factory.connect_bind(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
-            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            label.set_label(&supply_object.price().to_string());
-        });
-        max_quantity_factory.connect_bind(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
-            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            label.set_label(&supply_object.max_quantity().to_string());
-        });
-        length_unit_factory.connect_bind(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
-            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            label.set_label(&supply_object.length_unit());
-        });
-        length_factory.connect_bind(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
-            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            label.set_label(&supply_object.length().to_string());
-        });
+        self.factory_connect_bind(&name_factory, FactoryType::NameFactory);
+        self.factory_connect_bind(&material_factory, FactoryType::MaterialFactory);
+        self.factory_connect_bind(&max_quantity_factory, FactoryType::MaxQuantityFactory);
+        self.factory_connect_bind(&price_factory, FactoryType::PriceFactory);
+        self.factory_connect_bind(&length_unit_factory, FactoryType::LengthUnitFactory);
+        self.factory_connect_bind(&length_factory, FactoryType::LengthFactory);
 
         // // Add columns to the supplies view
         self.append_column_to_list_model(&supplies_view, "Name", &name_factory);
@@ -342,4 +334,13 @@ impl Window {
         );
         self.parts().append(&supply);
     }
+}
+
+enum FactoryType {
+    NameFactory,
+    MaterialFactory,
+    PriceFactory,
+    MaxQuantityFactory,
+    LengthUnitFactory,
+    LengthFactory,
 }
