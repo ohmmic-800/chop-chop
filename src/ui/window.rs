@@ -51,7 +51,7 @@ mod imp {
         #[template_child]
         pub parts_add_button: TemplateChild<gtk::Button>,
         #[template_child]
-        pub parts_supplies_view: TemplateChild<gtk::ColumnView>,
+        pub parts_view: TemplateChild<gtk::ColumnView>,
 
         // References to widgets in the solver pane
         #[template_child]
@@ -61,6 +61,7 @@ mod imp {
 
         // Model (data store) for the supply data
         pub supplies: RefCell<Option<gio::ListStore>>,
+        pub parts: RefCell<Option<gio::ListStore>>,
     }
 
     // The central trait for subclassing a GObject
@@ -159,6 +160,13 @@ impl Window {
         let supplies_view = &self.imp().supplies_view;
         let selection = gtk::SingleSelection::new(Some(self.supplies()));
         supplies_view.set_model(Some(&selection));
+
+        // Create the list model and link it to the column view
+        let model = Some(gio::ListStore::new::<SupplyGObject>());
+        self.imp().parts.replace(model);
+        let parts_view = &self.imp().parts_view;
+        let parts_selection = gtk::SingleSelection::new(Some(self.parts()));
+        parts_view.set_model(Some(&parts_selection));
 
         // Create a factory for each column
         let name_factory = gtk::SignalListItemFactory::new();
@@ -287,6 +295,50 @@ impl Window {
                 .factory(&length_factory)
                 .build(),
         );
+
+        // Add columns to the parts view
+        parts_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Name")
+                .expand(true)
+                .factory(&name_factory)
+                .build(),
+        );
+        parts_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Material")
+                .expand(true)
+                .factory(&material_factory)
+                .build(),
+        );
+        parts_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Price")
+                .expand(true)
+                .factory(&price_factory)
+                .build(),
+        );
+        parts_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Quantity")
+                .expand(true)
+                .factory(&max_quantity_factory)
+                .build(),
+        );
+        parts_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Unit")
+                .expand(true)
+                .factory(&length_unit_factory)
+                .build(),
+        );
+        parts_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title("Length")
+                .expand(true)
+                .factory(&length_factory)
+                .build(),
+        );
     }
 
     fn setup_callbacks(&self) {
@@ -296,6 +348,14 @@ impl Window {
             self,
             move |_| {
                 window.new_supply();
+            }
+        ));
+
+        self.imp().parts_add_button.connect_clicked(clone!(
+            #[weak(rename_to = window)]
+            self,
+            move |_| {
+                window.new_parts_supply();
             }
         ));
 
@@ -311,6 +371,10 @@ impl Window {
 
     fn supplies(&self) -> gio::ListStore {
         self.imp().supplies.borrow().clone().unwrap()
+    }
+
+    fn parts(&self) -> gio::ListStore {
+        self.imp().parts.borrow().clone().unwrap()
     }
 
     fn new_supply(&self) {
@@ -332,5 +396,26 @@ impl Window {
             self.imp().length_field.text().parse().unwrap_or(1.0),
         );
         self.supplies().append(&supply);
+    }
+
+    fn new_parts_supply(&self) {
+        // TODO: Get string directly from the combo box?
+        let length_unit = String::from(match self.imp().parts_length_unit_field.selected() {
+            0 => "Inches",
+            1 => "Centimeters",
+            2 => "Meters",
+            _ => panic!(),
+        });
+
+        // TODO: Improve invalid float handling
+        let supply = SupplyGObject::new(
+            self.imp().parts_name_field.text().to_string(),
+            self.imp().parts_material_field.text().to_string(),
+            self.imp().parts_price_field.text().parse().unwrap_or(0.0),
+            self.imp().parts_max_quantity_field.value() as u32,
+            length_unit,
+            self.imp().parts_length_field.text().parse().unwrap_or(1.0),
+        );
+        self.parts().append(&supply);
     }
 }

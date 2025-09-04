@@ -234,7 +234,7 @@
                       <object class="GtkScrolledWindow">
                         <property name="hscrollbar-policy">never</property>
                         <child>
-                          <object class="GtkColumnView" id="parts_supplies_view"></object>
+                          <object class="GtkColumnView" id="parts_view"></object>
                         </child>
                       </object>
                     </property>
