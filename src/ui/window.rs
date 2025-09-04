@@ -169,6 +169,15 @@ impl Window {
         );
     }
 
+    fn factory_connect_setup(&self, factory: &gtk::SignalListItemFactory) {
+        factory.connect_setup(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let label = gtk::Label::new(None);
+            label.set_halign(gtk::Align::Start);
+            list_item.set_child(Some(&label));
+        });
+    }
+
     // TODO: Reduce duplicate code
     fn setup_supplies(&self) {
         // Create the list model and link it to the column view
@@ -194,42 +203,12 @@ impl Window {
         let length_factory = gtk::SignalListItemFactory::new();
 
         // Callbacks invoked when a new widget needs to be created
-        name_factory.connect_setup(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let label = gtk::Label::new(None);
-            label.set_halign(gtk::Align::Start);
-            list_item.set_child(Some(&label));
-        });
-        material_factory.connect_setup(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let label = gtk::Label::new(None);
-            label.set_halign(gtk::Align::Start);
-            list_item.set_child(Some(&label));
-        });
-        max_quantity_factory.connect_setup(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let label = gtk::Label::new(None);
-            label.set_halign(gtk::Align::Start);
-            list_item.set_child(Some(&label));
-        });
-        price_factory.connect_setup(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let label = gtk::Label::new(None);
-            label.set_halign(gtk::Align::Start);
-            list_item.set_child(Some(&label));
-        });
-        length_unit_factory.connect_setup(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let label = gtk::Label::new(None);
-            label.set_halign(gtk::Align::Start);
-            list_item.set_child(Some(&label));
-        });
-        length_factory.connect_setup(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let label = gtk::Label::new(None);
-            label.set_halign(gtk::Align::Start);
-            list_item.set_child(Some(&label));
-        });
+        self.factory_connect_setup(&name_factory);
+        self.factory_connect_setup(&material_factory);
+        self.factory_connect_setup(&max_quantity_factory);
+        self.factory_connect_setup(&price_factory);
+        self.factory_connect_setup(&length_unit_factory);
+        self.factory_connect_setup(&length_factory);
 
         // Callbacks invoked when an item in the model needs to be bound to a widget
         name_factory.connect_bind(move |_, list_item| {
