@@ -174,10 +174,6 @@
                               </object>
                             </child>
                             <child>
-                              <object class="AdwEntryRow" id="parts_price_field">
-                                <property name="title">Price</property>
-                                <property name="text">0.00</property>
-                              </object>
                             </child>
                             <child>
                               <object class="AdwSpinRow" id="parts_max_quantity_field">

@@ -42,8 +42,6 @@ mod imp {
         #[template_child]
         pub parts_material_field: TemplateChild<adw::EntryRow>,
         #[template_child]
-        pub parts_price_field: TemplateChild<adw::EntryRow>,
-        #[template_child]
         pub parts_max_quantity_field: TemplateChild<adw::SpinRow>,
         #[template_child]
         pub parts_length_unit_field: TemplateChild<adw::ComboRow>,
@@ -186,6 +184,7 @@ impl Window {
     ) {
         factory.connect_bind(move |_, list_item| {
             let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            // TODO: The below line is getting mad when I click the 'add' button in the parts section.
             let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
             let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
             match factory_type {
@@ -201,7 +200,6 @@ impl Window {
         });
     }
 
-    // TODO: Reduce duplicate code
     fn setup_supplies(&self) {
         // Create the list model and link it to the column view
         let model = Some(gio::ListStore::new::<SupplyGObject>());
@@ -211,7 +209,7 @@ impl Window {
         supplies_view.set_model(Some(&selection));
 
         // Create the list model and link it to the column view
-        let model = Some(gio::ListStore::new::<SupplyGObject>());
+        let model = Some(gio::ListStore::new::<PartGObject>());
         self.imp().parts.replace(model);
         let parts_view = &self.imp().parts_view;
         let parts_selection = gtk::SingleSelection::new(Some(self.parts()));
@@ -252,7 +250,6 @@ impl Window {
         // Add columns to the parts view
         self.append_column_to_list_model(&parts_view, "Name", &name_factory);
         self.append_column_to_list_model(&parts_view, "Material", &material_factory);
-        self.append_column_to_list_model(&parts_view, "Price", &price_factory);
         self.append_column_to_list_model(&parts_view, "Quantity", &max_quantity_factory);
         self.append_column_to_list_model(&parts_view, "Unit", &length_unit_factory);
         self.append_column_to_list_model(&parts_view, "Length", &length_factory);
@@ -326,10 +323,9 @@ impl Window {
         });
 
         // TODO: Improve invalid float handling
-        let supply = SupplyGObject::new(
+        let supply = PartGObject::new(
             self.imp().parts_name_field.text().to_string(),
             self.imp().parts_material_field.text().to_string(),
-            self.imp().parts_price_field.text().parse().unwrap_or(0.0),
             self.imp().parts_max_quantity_field.value() as u32,
             length_unit,
             self.imp().parts_length_field.text().parse().unwrap_or(1.0),
