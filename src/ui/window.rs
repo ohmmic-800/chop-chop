@@ -181,20 +181,41 @@ impl Window {
         });
     }
 
-    fn factory_connect_bind(
+    fn factory_connect_bind_supply(
         &self,
         factory: &gtk::SignalListItemFactory,
         factory_type: FactoryType,
     ) {
         factory.connect_bind(move |_, list_item| {
             let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            // TODO: The below line is getting mad when I click the 'add' button in the parts section.
             let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
             let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
             match factory_type {
                 FactoryType::NameFactory => label.set_label(&supply_object.name()),
                 FactoryType::MaterialFactory => label.set_label(&supply_object.material()),
                 FactoryType::PriceFactory => label.set_label(&supply_object.price().to_string()),
+                FactoryType::MaxQuantityFactory => {
+                    label.set_label(&supply_object.max_quantity().to_string())
+                }
+                FactoryType::LengthUnitFactory => label.set_label(&supply_object.length_unit()),
+                FactoryType::LengthFactory => label.set_label(&supply_object.length().to_string()),
+            }
+        });
+    }
+
+    fn factory_connect_bind_parts(
+        &self,
+        factory: &gtk::SignalListItemFactory,
+        factory_type: FactoryType,
+    ) {
+        factory.connect_bind(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let supply_object = list_item.item().and_downcast::<PartGObject>().unwrap();
+            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+            match factory_type {
+                FactoryType::NameFactory => label.set_label(&supply_object.name()),
+                FactoryType::MaterialFactory => label.set_label(&supply_object.material()),
+                FactoryType::PriceFactory => {}
                 FactoryType::MaxQuantityFactory => {
                     label.set_label(&supply_object.max_quantity().to_string())
                 }
@@ -227,6 +248,12 @@ impl Window {
         let length_unit_factory = gtk::SignalListItemFactory::new();
         let length_factory = gtk::SignalListItemFactory::new();
 
+        let parts_name_factory = gtk::SignalListItemFactory::new();
+        let parts_material_factory = gtk::SignalListItemFactory::new();
+        let parts_max_quantity_factory = gtk::SignalListItemFactory::new();
+        let parts_length_unit_factory = gtk::SignalListItemFactory::new();
+        let parts_length_factory = gtk::SignalListItemFactory::new();
+
         // Callbacks invoked when a new widget needs to be created
         self.factory_connect_setup(&name_factory);
         self.factory_connect_setup(&material_factory);
@@ -235,13 +262,28 @@ impl Window {
         self.factory_connect_setup(&length_unit_factory);
         self.factory_connect_setup(&length_factory);
 
+        self.factory_connect_setup(&parts_name_factory);
+        self.factory_connect_setup(&parts_material_factory);
+        self.factory_connect_setup(&parts_max_quantity_factory);
+        self.factory_connect_setup(&parts_length_unit_factory);
+        self.factory_connect_setup(&parts_length_factory);
+
         // Callbacks invoked when an item in the model needs to be bound to a widget
-        self.factory_connect_bind(&name_factory, FactoryType::NameFactory);
-        self.factory_connect_bind(&material_factory, FactoryType::MaterialFactory);
-        self.factory_connect_bind(&max_quantity_factory, FactoryType::MaxQuantityFactory);
-        self.factory_connect_bind(&price_factory, FactoryType::PriceFactory);
-        self.factory_connect_bind(&length_unit_factory, FactoryType::LengthUnitFactory);
-        self.factory_connect_bind(&length_factory, FactoryType::LengthFactory);
+        self.factory_connect_bind_supply(&name_factory, FactoryType::NameFactory);
+        self.factory_connect_bind_supply(&material_factory, FactoryType::MaterialFactory);
+        self.factory_connect_bind_supply(&max_quantity_factory, FactoryType::MaxQuantityFactory);
+        self.factory_connect_bind_supply(&price_factory, FactoryType::PriceFactory);
+        self.factory_connect_bind_supply(&length_unit_factory, FactoryType::LengthUnitFactory);
+        self.factory_connect_bind_supply(&length_factory, FactoryType::LengthFactory);
+
+        self.factory_connect_bind_parts(&parts_name_factory, FactoryType::NameFactory);
+        self.factory_connect_bind_parts(&parts_material_factory, FactoryType::MaterialFactory);
+        self.factory_connect_bind_parts(
+            &parts_max_quantity_factory,
+            FactoryType::MaxQuantityFactory,
+        );
+        self.factory_connect_bind_parts(&parts_length_unit_factory, FactoryType::LengthUnitFactory);
+        self.factory_connect_bind_parts(&parts_length_factory, FactoryType::LengthFactory);
 
         // // Add columns to the supplies view
         self.append_column_to_list_model(&supplies_view, "Name", &name_factory);
@@ -252,11 +294,11 @@ impl Window {
         self.append_column_to_list_model(&supplies_view, "Length", &length_factory);
 
         // Add columns to the parts view
-        self.append_column_to_list_model(&parts_view, "Name", &name_factory);
-        self.append_column_to_list_model(&parts_view, "Material", &material_factory);
-        self.append_column_to_list_model(&parts_view, "Quantity", &max_quantity_factory);
-        self.append_column_to_list_model(&parts_view, "Unit", &length_unit_factory);
-        self.append_column_to_list_model(&parts_view, "Length", &length_factory);
+        self.append_column_to_list_model(&parts_view, "Name", &parts_name_factory);
+        self.append_column_to_list_model(&parts_view, "Material", &parts_material_factory);
+        self.append_column_to_list_model(&parts_view, "Quantity", &parts_max_quantity_factory);
+        self.append_column_to_list_model(&parts_view, "Unit", &parts_length_unit_factory);
+        self.append_column_to_list_model(&parts_view, "Length", &parts_length_factory);
     }
 
     fn setup_callbacks(&self) {
