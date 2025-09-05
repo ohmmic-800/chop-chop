@@ -67,6 +67,8 @@ dependencies = [
  "glib-build-tools",
  "gtk4",
  "libadwaita",
+ "pango",
+ "pangocairo",
 ]
 
 [[package]]
@@ -536,6 +538,32 @@ dependencies = [
  "glib-sys",
  "gobject-sys",
  "libc",
+ "system-deps",
+]
+
+[[package]]
+name = "pangocairo"
+version = "0.21.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb23cf0052917cbf75f160d4913a46ce741567f566b514fadc09d761f41eb2fb"
+dependencies = [
+ "cairo-rs",
+ "glib",
+ "libc",
+ "pango",
+ "pangocairo-sys",
+]
+
+[[package]]
+name = "pangocairo-sys"
+version = "0.21.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcda09c0b17007d7eb6c5eb1643c5b40b067073c15f0cc5a809a6fc68b5d9be7"
+dependencies = [
+ "cairo-sys-rs",
+ "glib-sys",
+ "libc",
+ "pango-sys",
  "system-deps",
 ]
 

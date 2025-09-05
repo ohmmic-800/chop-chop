@@ -5,7 +5,7 @@ use std::time::Duration;
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::glib::{Object, clone, subclass::InitializingObject};
-use gtk::{ColumnView, CompositeTemplate, gio, glib};
+use gtk::{ColumnView, CompositeTemplate, PrintOperation, gio, glib};
 
 use super::overlay::Overlay;
 use super::parts::PartGObject;
@@ -58,6 +58,8 @@ mod imp {
         #[template_child]
         pub run_button: TemplateChild<gtk::Button>,
         #[template_child]
+        pub print_button: TemplateChild<gtk::Button>,
+        #[template_child]
         pub drawing_area: TemplateChild<gtk::DrawingArea>,
 
         // Model (data store) for the supply data
@@ -91,14 +93,6 @@ mod imp {
             let obj = self.obj();
             obj.setup_supplies();
             obj.setup_callbacks();
-            self.drawing_area.set_draw_func(move |_area, cairo, w, h| {
-                cairo.set_source_rgb(1.0, 0.5, 0.5);
-                cairo.rectangle(20.0, 20.0, (w as f64) - 40.0, (h as f64) - 40.0);
-                cairo.stroke().unwrap();
-                cairo.move_to(100.0, 100.0);
-                cairo.set_font_size(72.0);
-                cairo.show_text("Hello, world!").unwrap();
-            });
         }
     }
 
@@ -284,11 +278,88 @@ impl Window {
         ));
 
         // Set up callback for clicking the run button
+        // TODO: Lock UI *immediately* after pressing (currently possible to double-click)
         self.imp().run_button.connect_clicked(clone!(
             #[weak(rename_to = window)]
             self,
             move |_| {
                 window.run_solver();
+            }
+        ));
+
+        // TODO: Ensure output looks the same when printed
+        // Has something to do with resolution (display units)
+
+        // TODO: Print button in bottom adwaita toolbar alongside delete button?
+
+        self.imp()
+            .drawing_area
+            .set_draw_func(move |_area, cairo, w, h| {
+                //Initi pango and set a font
+                let font_description = pango::FontDescription::from_string("sans 14");
+                let pango_layout = pangocairo::functions::create_layout(cairo);
+                pango_layout.set_font_description(Option::from(&font_description));
+
+                cairo.set_source_rgb(1.0, 0.5, 0.5);
+                cairo.rectangle(5.0, 5.0, (w as f64) - 10.0, (h as f64) - 10.0);
+                cairo.stroke().unwrap();
+
+                // Draw text1
+                pango_layout.set_text("Hello");
+                cairo.move_to(10.0, 10.0);
+                pangocairo::functions::show_layout(&cairo, &pango_layout);
+
+                //Draw text2 below text1
+                pango_layout.set_text("World");
+                cairo.rel_move_to(0.0, 20.0);
+                pangocairo::functions::show_layout(&cairo, &pango_layout);
+            });
+
+        // Based on this example:
+        // https://github.com/gtk-rs/examples/blob/master/src/bin/printing.rs
+        self.imp().print_button.connect_clicked(clone!(
+            #[weak(rename_to = window)]
+            self,
+            move |_| {
+                let print_operation = PrintOperation::new();
+                print_operation.connect_begin_print(move |print_operation, _| {
+                    // This sets the number of pages of the document.
+                    // You most likely will calculate this, but for this example
+                    // it's hardcoded as 1
+                    print_operation.set_n_pages(1);
+                });
+
+                print_operation.connect_draw_page(move |_, print_context, _| {
+                    let cairo = print_context.cairo_context();
+
+                    let w = print_context.width();
+                    let h = print_context.height();
+
+                    //Initi pango and set a font
+                    let font_description = pango::FontDescription::from_string("sans 14");
+                    let pango_layout = pangocairo::functions::create_layout(&cairo);
+
+                    // let pango_layout = print_context.create_pango_layout();
+                    pango_layout.set_font_description(Option::from(&font_description));
+
+                    cairo.set_source_rgb(1.0, 0.5, 0.5);
+                    cairo.rectangle(5.0, 5.0, w - 10.0, h - 10.0);
+                    cairo.stroke().unwrap();
+
+                    // Draw text1
+                    pango_layout.set_text("Hello");
+                    cairo.move_to(10.0, 10.0);
+                    pangocairo::functions::show_layout(&cairo, &pango_layout);
+
+                    //Draw text2 below text1
+                    pango_layout.set_text("World");
+                    cairo.rel_move_to(0.0, 20.0);
+                    pangocairo::functions::show_layout(&cairo, &pango_layout);
+                });
+
+                print_operation
+                    .run(gtk::PrintOperationAction::PrintDialog, Some(&window))
+                    .unwrap();
             }
         ));
     }

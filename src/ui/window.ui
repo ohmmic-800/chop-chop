@@ -280,6 +280,14 @@
                             </style>
                           </object>
                         </child>
+                        <child>
+                          <object class="GtkButton" id="print_button">
+                            <property name="label">Print</property>
+                            <style>
+                              <class name="pill" />
+                            </style>
+                          </object>
+                        </child>
                       </object>
                     </property>
                     <property name="content">
