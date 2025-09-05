@@ -321,7 +321,9 @@ impl Window {
             #[weak(rename_to = window)]
             self,
             move |_| {
+                // TODO: Some parts of the dialog may be disablable using builder options
                 let print_operation = PrintOperation::new();
+
                 print_operation.connect_begin_print(move |print_operation, _| {
                     // This sets the number of pages of the document.
                     // You most likely will calculate this, but for this example
