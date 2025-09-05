@@ -57,6 +57,8 @@ mod imp {
         pub solver_field: TemplateChild<adw::ComboRow>,
         #[template_child]
         pub run_button: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub drawing_area: TemplateChild<gtk::DrawingArea>,
 
         // Model (data store) for the supply data
         pub supplies: RefCell<Option<gio::ListStore>>,
@@ -90,6 +92,14 @@ mod imp {
             obj.setup_supplies();
             obj.setup_callbacks();
             obj.setup_css();
+            self.drawing_area.set_draw_func(move |_area, cairo, w, h| {
+                cairo.set_source_rgb(1.0, 0.5, 0.5);
+                cairo.rectangle(20.0, 20.0, (w as f64) - 40.0, (h as f64) - 40.0);
+                cairo.stroke().unwrap();
+                cairo.move_to(100.0, 100.0);
+                cairo.set_font_size(72.0);
+                cairo.show_text("Hello, world!").unwrap();
+            });
         }
     }
 

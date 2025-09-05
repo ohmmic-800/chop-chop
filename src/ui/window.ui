@@ -283,9 +283,7 @@
                       </object>
                     </property>
                     <property name="content">
-                      <object class="AdwStatusPage">
-                        <property name="title">Solver Page</property>
-                      </object>
+                      <object class="GtkDrawingArea" id="drawing_area"></object>
                     </property>
                   </object>
                 </property>
