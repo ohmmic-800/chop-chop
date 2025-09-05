@@ -91,7 +91,6 @@ mod imp {
             let obj = self.obj();
             obj.setup_supplies();
             obj.setup_callbacks();
-            obj.setup_css();
             self.drawing_area.set_draw_func(move |_area, cairo, w, h| {
                 cairo.set_source_rgb(1.0, 0.5, 0.5);
                 cairo.rectangle(20.0, 20.0, (w as f64) - 40.0, (h as f64) - 40.0);
@@ -342,22 +341,6 @@ impl Window {
             self.imp().parts_length_field.text().parse().unwrap_or(1.0),
         );
         self.parts().append(&supply);
-    }
-
-    fn setup_css(&self) {
-        self.imp().name_field.add_css_class("adw-entry-row");
-        self.imp().length_field.add_css_class("adw-entry-row");
-        self.imp().material_field.add_css_class("adw-entry-row");
-        self.imp().price_field.add_css_class("adw-entry-row");
-        self.imp().parts_name_field.add_css_class("adw-entry-row");
-        self.imp().parts_length_field.add_css_class("adw-entry-row");
-        self.imp()
-            .parts_material_field
-            .add_css_class("adw-entry-row");
-
-        self.imp().add_button.add_css_class("add_button");
-        self.imp().parts_add_button.add_css_class("add_button");
-        self.imp().run_button.add_css_class("add_button");
     }
 }
 
