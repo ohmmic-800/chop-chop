@@ -436,6 +436,13 @@ impl Window {
             self.imp().length_field.text().parse().unwrap_or(1.0),
         );
         self.supplies().append(&supply);
+
+        // Reset widgets
+        self.imp().name_field.set_text("");
+        self.imp().material_field.set_text("");
+        self.imp().price_field.set_text("0.00");
+        self.imp().max_quantity_field.set_value(0.0);
+        self.imp().length_field.set_text("");
     }
 
     fn new_parts_supply(&self) {
@@ -448,14 +455,20 @@ impl Window {
         });
 
         // TODO: Improve invalid float handling
-        let supply = PartGObject::new(
+        let parts = PartGObject::new(
             self.imp().parts_name_field.text().to_string(),
             self.imp().parts_material_field.text().to_string(),
             self.imp().parts_max_quantity_field.value() as u32,
             length_unit,
             self.imp().parts_length_field.text().parse().unwrap_or(1.0),
         );
-        self.parts().append(&supply);
+        self.parts().append(&parts);
+
+        // Reset widgets
+        self.imp().parts_name_field.set_text("");
+        self.imp().parts_material_field.set_text("");
+        self.imp().parts_max_quantity_field.set_value(0.0);
+        self.imp().parts_length_field.set_text("");
     }
 }
 
