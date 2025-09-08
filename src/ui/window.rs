@@ -319,6 +319,38 @@ impl Window {
             }
         ));
 
+        self.imp()
+            .supplies_view
+            .model()
+            .unwrap()
+            .connect_selection_changed(clone!(
+                #[weak(rename_to = window)]
+                self,
+                move |model, _, _| {
+                    let i = model.selection().minimum();
+                    let binding = window.supplies().item(i).unwrap();
+                    let supply_object = binding.downcast_ref::<SupplyGObject>().unwrap();
+                    window.imp().name_field.set_text(&supply_object.name());
+                    window
+                        .imp()
+                        .material_field
+                        .set_text(&supply_object.material());
+                    window
+                        .imp()
+                        .price_field
+                        .set_text(&supply_object.price().to_string());
+                    window
+                        .imp()
+                        .max_quantity_field
+                        .set_value(supply_object.max_quantity() as f64);
+                    window
+                        .imp()
+                        .length_field
+                        .set_text(&supply_object.length().to_string());
+                    // TODO: Set correct unit type
+                }
+            ));
+
         // Set up callback for clicking the run button
         // TODO: Lock UI *immediately* after pressing (currently possible to double-click)
         self.imp().run_button.connect_clicked(clone!(
