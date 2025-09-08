@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/ohmm-software/Chop-Chop/">
+    <file preprocess="xml-stripblanks">parts_pane.ui</file>
     <file preprocess="xml-stripblanks">solver_overlay.ui</file>
+    <file preprocess="xml-stripblanks">solver_pane.ui</file>
+    <file preprocess="xml-stripblanks">supplies_pane.ui</file>
     <file preprocess="xml-stripblanks">window.ui</file>
 
     <!--

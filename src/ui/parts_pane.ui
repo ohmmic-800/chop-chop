@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.10" />
+  <requires lib="libadwaita" version="1.4" />
+  <template class="ChopChopPartsPane" parent="GtkBox">
+    <child>
+      <object class="AdwOverlaySplitView">
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+        <property name="min_sidebar_width">300</property>
+        <property name="sidebar">
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">20</property>
+            <property name="margin-start">20</property>
+            <property name="margin-end">20</property>
+            <property name="margin-top">20</property>
+            <property name="margin-bottom">20</property>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <child>
+                  <object class="AdwEntryRow" id="name_field">
+                    <property name="title">Name</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwEntryRow" id="material_field">
+                    <property name="title">Material</property>
+                  </object>
+                </child>
+                <child>
+                </child>
+                <child>
+                  <object class="AdwSpinRow" id="max_quantity_field">
+                    <property name="title">Quantity</property>
+                    <property name="subtitle">Zero for unlimited</property>
+                    <property name="adjustment">
+                      <object class="GtkAdjustment">
+                        <property name="lower">1</property>
+                        <property name="upper">100</property>
+                        <property name="value">0</property>
+                        <property name="page-increment">10</property>
+                        <property name="step-increment">1</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <child>
+                  <object class="AdwComboRow" id="length_unit_field">
+                    <property name="title">Unit</property>
+                    <property name="model">
+                      <object class="GtkStringList">
+                        <items>
+                          <item>Inches</item>
+                          <item>Centimeters</item>
+                          <item>Meters</item>
+                        </items>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwEntryRow" id="length_field">
+                    <property name="title">Length</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="add_button">
+                <property name="label">Add</property>
+                <style>
+                  <class name="pill" />
+                  <class name="suggested-action" />
+                </style>
+              </object>
+            </child>
+          </object>
+        </property>
+        <property name="content">
+          <object class="GtkScrolledWindow">
+            <property name="hscrollbar-policy">never</property>
+            <child>
+              <object class="GtkColumnView" id="parts_view"></object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

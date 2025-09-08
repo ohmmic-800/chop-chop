@@ -45,7 +45,7 @@ mod imp {
     // Trait shared by all widgets
     impl WidgetImpl for SolverOverlay {}
 
-    // Trait shared by all Adwaita application windows
+    // Trait shared by all Adwaita overlays
     impl AdwDialogImpl for SolverOverlay {}
 }
 

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.10" />
+  <requires lib="libadwaita" version="1.4" />
+  <template class="ChopChopSolverPane" parent="GtkBox">
+    <child>
+      <object class="AdwOverlaySplitView">
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+        <property name="min_sidebar_width">300</property>
+        <property name="sidebar">
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">20</property>
+            <property name="margin-start">20</property>
+            <property name="margin-end">20</property>
+            <property name="margin-top">20</property>
+            <property name="margin-bottom">20</property>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <child>
+                  <object class="AdwComboRow" id="solver_field">
+                    <property name="title">Solver</property>
+                    <property name="model">
+                      <object class="GtkStringList">
+                        <items>
+                          <item>Naive</item>
+                        </items>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="run_button">
+                <property name="label">Run</property>
+                <style>
+                  <class name="pill" />
+                  <class name="suggested-action" />
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="print_button">
+                <property name="label">Print</property>
+                <style>
+                  <class name="pill" />
+                </style>
+              </object>
+            </child>
+          </object>
+        </property>
+        <property name="content">
+          <object class="GtkDrawingArea" id="drawing_area"></object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>
