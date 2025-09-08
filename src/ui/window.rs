@@ -34,6 +34,10 @@ mod imp {
         #[template_child]
         pub add_button: TemplateChild<gtk::Button>,
         #[template_child]
+        pub update_button: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub delete_button: TemplateChild<gtk::Button>,
+        #[template_child]
         pub supplies_view: TemplateChild<gtk::ColumnView>,
 
         // Reference to widgets in the parts pane
@@ -311,6 +315,26 @@ impl Window {
             }
         ));
 
+        self.imp().delete_button.connect_clicked(clone!(
+            #[weak(rename_to = window)]
+            self,
+            move |_| {
+                // TODO: Do nothing if there is no active/selected row
+                // TODO: Does the selection index always match the index in the model?
+                let model = window.imp().supplies_view.model();
+                let i = model.unwrap().selection().minimum();
+                window.supplies().remove(i);
+            }
+        ));
+
+        self.imp().update_button.connect_clicked(clone!(
+            #[weak(rename_to = window)]
+            self,
+            move |_| {
+                window.update_supply();
+            }
+        ));
+
         self.imp().parts_add_button.connect_clicked(clone!(
             #[weak(rename_to = window)]
             self,
@@ -470,11 +494,43 @@ impl Window {
         self.supplies().append(&supply);
 
         // Reset widgets
-        self.imp().name_field.set_text("");
-        self.imp().material_field.set_text("");
-        self.imp().price_field.set_text("0.00");
-        self.imp().max_quantity_field.set_value(0.0);
-        self.imp().length_field.set_text("");
+        // self.imp().name_field.set_text("");
+        // self.imp().material_field.set_text("");
+        // self.imp().price_field.set_text("0.00");
+        // self.imp().max_quantity_field.set_value(0.0);
+        // self.imp().length_field.set_text("");
+
+        let model = self.imp().supplies_view.model().unwrap();
+        model.select_item(model.n_items() - 1, true);
+    }
+
+    // TODO: Find a way to combine new_supply and new_parts_supply methods.x
+    fn update_supply(&self) {
+        // TODO: Do nothing if there is no active/selected row
+        // TODO: Does the selection index always match the index in the model?
+        let model = self.imp().supplies_view.model().unwrap();
+        let i = model.selection().minimum();
+
+        // TODO: Get string directly from the combo box?
+        let length_unit = String::from(match self.imp().length_unit_field.selected() {
+            0 => "Inches",
+            1 => "Centimeters",
+            2 => "Meters",
+            _ => panic!(),
+        });
+
+        // TODO: Improve invalid float handling
+        let supply = SupplyGObject::new(
+            self.imp().name_field.text().to_string(),
+            self.imp().material_field.text().to_string(),
+            self.imp().price_field.text().parse().unwrap_or(0.0),
+            self.imp().max_quantity_field.value() as u32,
+            length_unit,
+            self.imp().length_field.text().parse().unwrap_or(1.0),
+        );
+        self.supplies().remove(i);
+        self.supplies().insert(i, &supply);
+        model.select_item(i, true);
     }
 
     fn new_parts_supply(&self) {
