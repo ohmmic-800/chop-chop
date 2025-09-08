@@ -8,8 +8,8 @@ mod imp {
 
     // Object holding the state
     #[derive(CompositeTemplate, Default)]
-    #[template(resource = "/com/ohmm-software/Chop-Chop/overlay.ui")]
-    pub struct Overlay {
+    #[template(resource = "/com/ohmm-software/Chop-Chop/solver_overlay.ui")]
+    pub struct SolverOverlay {
         #[template_child]
         pub progress_bar: TemplateChild<gtk::ProgressBar>,
         #[template_child]
@@ -18,9 +18,9 @@ mod imp {
 
     // The central trait for subclassing a GObject
     #[glib::object_subclass]
-    impl ObjectSubclass for Overlay {
-        const NAME: &'static str = "ChopChopOverlay";
-        type Type = super::Overlay;
+    impl ObjectSubclass for SolverOverlay {
+        const NAME: &'static str = "ChopChopSolverOverlay";
+        type Type = super::SolverOverlay;
         type ParentType = adw::Dialog;
 
         fn class_init(klass: &mut Self::Class) {
@@ -35,7 +35,7 @@ mod imp {
     }
 
     // Trait shared by all GObjects
-    impl ObjectImpl for Overlay {
+    impl ObjectImpl for SolverOverlay {
         // Called when the object is constructed
         fn constructed(&self) {
             self.obj().setup_callbacks();
@@ -43,19 +43,19 @@ mod imp {
     }
 
     // Trait shared by all widgets
-    impl WidgetImpl for Overlay {}
+    impl WidgetImpl for SolverOverlay {}
 
     // Trait shared by all Adwaita application windows
-    impl AdwDialogImpl for Overlay {}
+    impl AdwDialogImpl for SolverOverlay {}
 }
 
 glib::wrapper! {
-    pub struct Overlay(ObjectSubclass<imp::Overlay>)
+    pub struct SolverOverlay(ObjectSubclass<imp::SolverOverlay>)
         @extends adw::Dialog, gtk::Widget,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::ShortcutManager;
 }
 
-impl Overlay {
+impl SolverOverlay {
     pub fn new() -> Self {
         Object::builder().build()
     }

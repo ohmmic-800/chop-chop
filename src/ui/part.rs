@@ -16,7 +16,7 @@ pub struct PartData {
     pub length: f32,
 }
 
-// Wrap MaterialsData in a GObject so it can be used in a gtk::ListStore
+// Wrap PartData in a GObject so it can be used in a gtk::ListStore
 // https://gtk-rs.org/gtk4-rs/git/book/list_widgets.html#views
 mod imp {
     use super::*;

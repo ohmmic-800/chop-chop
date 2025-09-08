@@ -7,8 +7,8 @@ use adw::subclass::prelude::*;
 use gtk::glib::{Object, clone, subclass::InitializingObject};
 use gtk::{ColumnView, CompositeTemplate, PrintOperation, gio, glib};
 
-use super::overlay::Overlay;
-use super::parts::PartGObject;
+use super::part::PartGObject;
+use super::solver_overlay::SolverOverlay;
 use super::supply::SupplyGObject;
 
 mod imp {
@@ -127,7 +127,7 @@ impl Window {
 
     // https://gtk-rs.org/gtk4-rs/git/book/main_event_loop.html#channels
     fn run_solver(&self) {
-        let overlay = Overlay::new();
+        let overlay = SolverOverlay::new();
         overlay.set_can_close(false);
         overlay.present(Some(self));
 
