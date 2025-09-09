@@ -3,15 +3,21 @@ use std::cell::RefCell;
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::glib::{clone, subclass::InitializingObject};
-use gtk::{CompositeTemplate, gio, glib};
+use gtk::{gio::ListStore, glib};
 
 use super::supply::SupplyGObject;
+
+enum FieldType {
+    String,
+    F32,
+    U32,
+}
 
 mod imp {
     use super::*;
 
     // Object holding the state
-    #[derive(CompositeTemplate, Default)]
+    #[derive(gtk::CompositeTemplate, Default)]
     #[template(resource = "/com/ohmm-software/Chop-Chop/supplies_pane.ui")]
     pub struct SuppliesPane {
         // Entry fields
@@ -30,9 +36,9 @@ mod imp {
 
         // Buttons
         #[template_child]
-        pub add_button: TemplateChild<gtk::Button>,
-        #[template_child]
         pub update_button: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub add_button: TemplateChild<gtk::Button>,
         #[template_child]
         pub delete_button: TemplateChild<gtk::Button>,
 
@@ -41,7 +47,7 @@ mod imp {
         pub supplies_view: TemplateChild<gtk::ColumnView>,
 
         // Model (data store)
-        pub supplies: RefCell<Option<gio::ListStore>>,
+        pub supplies: RefCell<Option<ListStore>>,
     }
 
     // The central trait for subclassing a GObject
@@ -67,9 +73,8 @@ mod imp {
         // Called when the object is constructed
         fn constructed(&self) {
             self.parent_constructed();
-            let obj = self.obj();
-            obj.setup_supplies();
-            obj.setup_callbacks();
+            self.obj().setup_column_view();
+            self.obj().setup_callbacks();
         }
     }
 
@@ -87,117 +92,40 @@ glib::wrapper! {
 }
 
 impl SuppliesPane {
-    // Appends a column to a list_model.
-    fn append_column_to_list_model(
-        &self,
-        list_model: &TemplateChild<gtk::ColumnView>,
-        title: &str,
-        factory: &impl IsA<gtk::ListItemFactory>,
-    ) {
-        // Add columns to the view
-        list_model.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title(title)
-                .expand(true)
-                .factory(factory)
-                .build(),
-        );
+    fn add_supply(&self) {
+        self.supplies().append(&self.parse_fields());
+
+        // Select the item we just added
+        let selection_model = self.selection_model();
+        selection_model.select_item(selection_model.n_items() - 1, true);
     }
 
-    fn factory_connect_setup(&self, factory: &gtk::SignalListItemFactory) {
-        factory.connect_setup(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let label = gtk::Label::new(None);
-            label.set_halign(gtk::Align::Start);
-            list_item.set_child(Some(&label));
+    fn delete_supply(&self) {
+        let selection = self.selection_model().selection();
+        if !selection.is_empty() {
+            self.supplies().remove(selection.minimum());
+        }
+    }
+
+    fn parse_fields(&self) -> SupplyGObject {
+        // TODO: Manual match is bad
+        let length_unit = String::from(match self.imp().length_unit_field.selected() {
+            0 => "Inches",
+            1 => "Centimeters",
+            2 => "Meters",
+            _ => panic!(),
         });
-    }
-
-    fn factory_connect_bind_supply(
-        &self,
-        factory: &gtk::SignalListItemFactory,
-        factory_type: FactoryType,
-    ) {
-        factory.connect_bind(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let supply_object = list_item.item().and_downcast::<SupplyGObject>().unwrap();
-            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            match factory_type {
-                FactoryType::NameFactory => label.set_label(&supply_object.name()),
-                FactoryType::MaterialFactory => label.set_label(&supply_object.material()),
-                FactoryType::PriceFactory => label.set_label(&supply_object.price().to_string()),
-                FactoryType::MaxQuantityFactory => {
-                    label.set_label(&supply_object.max_quantity().to_string())
-                }
-                FactoryType::LengthUnitFactory => label.set_label(&supply_object.length_unit()),
-                FactoryType::LengthFactory => label.set_label(&supply_object.length().to_string()),
-            }
-        });
-    }
-
-    fn setup_supplies(&self) {
-        // Create the list model and link it to the column view
-        let model = Some(gio::ListStore::new::<SupplyGObject>());
-        self.imp().supplies.replace(model);
-        let supplies_view = &self.imp().supplies_view;
-        let selection = gtk::SingleSelection::new(Some(self.supplies()));
-        supplies_view.set_model(Some(&selection));
-
-        // Create a factory for each column
-        let name_factory = gtk::SignalListItemFactory::new();
-        let material_factory = gtk::SignalListItemFactory::new();
-        let max_quantity_factory = gtk::SignalListItemFactory::new();
-        let price_factory = gtk::SignalListItemFactory::new();
-        let length_unit_factory = gtk::SignalListItemFactory::new();
-        let length_factory = gtk::SignalListItemFactory::new();
-
-        // Callbacks invoked when a new widget needs to be created
-        self.factory_connect_setup(&name_factory);
-        self.factory_connect_setup(&material_factory);
-        self.factory_connect_setup(&max_quantity_factory);
-        self.factory_connect_setup(&price_factory);
-        self.factory_connect_setup(&length_unit_factory);
-        self.factory_connect_setup(&length_factory);
-
-        // Callbacks invoked when an item in the model needs to be bound to a widget
-        self.factory_connect_bind_supply(&name_factory, FactoryType::NameFactory);
-        self.factory_connect_bind_supply(&material_factory, FactoryType::MaterialFactory);
-        self.factory_connect_bind_supply(&max_quantity_factory, FactoryType::MaxQuantityFactory);
-        self.factory_connect_bind_supply(&price_factory, FactoryType::PriceFactory);
-        self.factory_connect_bind_supply(&length_unit_factory, FactoryType::LengthUnitFactory);
-        self.factory_connect_bind_supply(&length_factory, FactoryType::LengthFactory);
-
-        // // Add columns to the supplies view
-        self.append_column_to_list_model(&supplies_view, "Name", &name_factory);
-        self.append_column_to_list_model(&supplies_view, "Material", &material_factory);
-        self.append_column_to_list_model(&supplies_view, "Price", &price_factory);
-        self.append_column_to_list_model(&supplies_view, "Quantity", &max_quantity_factory);
-        self.append_column_to_list_model(&supplies_view, "Unit", &length_unit_factory);
-        self.append_column_to_list_model(&supplies_view, "Length", &length_factory);
+        SupplyGObject::new(
+            self.imp().name_field.text().to_string(),
+            self.imp().material_field.text().to_string(),
+            self.imp().price_field.text().parse().unwrap_or(0.0),
+            self.imp().max_quantity_field.value() as u32,
+            length_unit,
+            self.imp().length_field.text().parse().unwrap_or(1.0),
+        )
     }
 
     fn setup_callbacks(&self) {
-        // Set up callback for clicking the add button
-        self.imp().add_button.connect_clicked(clone!(
-            #[weak(rename_to = window)]
-            self,
-            move |_| {
-                window.new_supply();
-            }
-        ));
-
-        self.imp().delete_button.connect_clicked(clone!(
-            #[weak(rename_to = window)]
-            self,
-            move |_| {
-                // TODO: Do nothing if there is no active/selected row
-                // TODO: Does the selection index always match the index in the model?
-                let model = window.imp().supplies_view.model();
-                let i = model.unwrap().selection().minimum();
-                window.supplies().remove(i);
-            }
-        ));
-
         self.imp().update_button.connect_clicked(clone!(
             #[weak(rename_to = window)]
             self,
@@ -205,111 +133,125 @@ impl SuppliesPane {
                 window.update_supply();
             }
         ));
-
-        self.imp()
-            .supplies_view
-            .model()
-            .unwrap()
-            .connect_selection_changed(clone!(
-                #[weak(rename_to = window)]
-                self,
-                move |model, _, _| {
-                    let i = model.selection().minimum();
-                    let binding = window.supplies().item(i).unwrap();
-                    let supply_object = binding.downcast_ref::<SupplyGObject>().unwrap();
-                    window.imp().name_field.set_text(&supply_object.name());
-                    window
-                        .imp()
-                        .material_field
-                        .set_text(&supply_object.material());
-                    window
-                        .imp()
-                        .price_field
-                        .set_text(&supply_object.price().to_string());
-                    window
-                        .imp()
-                        .max_quantity_field
-                        .set_value(supply_object.max_quantity() as f64);
-                    window
-                        .imp()
-                        .length_field
-                        .set_text(&supply_object.length().to_string());
-                    // TODO: Set correct unit type
-                }
-            ));
+        self.imp().add_button.connect_clicked(clone!(
+            #[weak(rename_to = window)]
+            self,
+            move |_| {
+                window.add_supply();
+            }
+        ));
+        self.imp().delete_button.connect_clicked(clone!(
+            #[weak(rename_to = window)]
+            self,
+            move |_| {
+                window.delete_supply();
+            }
+        ));
+        self.selection_model().connect_selection_changed(clone!(
+            #[weak(rename_to = window)]
+            self,
+            move |_, _, _| {
+                window.update_fields();
+            }
+        ));
     }
 
-    fn supplies(&self) -> gio::ListStore {
+    fn setup_column(&self, field_type: FieldType, property: &'static str, column_title: &str) {
+        let factory = gtk::SignalListItemFactory::new();
+
+        // Called when a new row of widgets is added
+        factory.connect_setup(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let label = gtk::Label::builder().halign(gtk::Align::Start).build();
+            list_item.set_child(Some(&label));
+        });
+
+        // Called when an object in the model is bound to a row
+        factory.connect_bind(move |_, list_item| {
+            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+            let supply_gobject = list_item.item().and_downcast::<SupplyGObject>().unwrap();
+            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+            let value = match field_type {
+                FieldType::String => supply_gobject.property::<String>(property),
+                FieldType::F32 => supply_gobject.property::<f32>(property).to_string(),
+                FieldType::U32 => supply_gobject.property::<u32>(property).to_string(),
+            };
+            label.set_label(&value);
+        });
+
+        // Create a column and add it to the view
+        self.imp().supplies_view.append_column(
+            &gtk::ColumnViewColumn::builder()
+                .title(column_title)
+                .expand(true)
+                .factory(&factory)
+                .build(),
+        );
+    }
+
+    fn setup_column_view(&self) {
+        // Create the list store (swap into the RefCell)
+        let model = Some(ListStore::new::<SupplyGObject>());
+        self.imp().supplies.replace(model);
+
+        // Link the model to the column view
+        let selection = gtk::SingleSelection::new(Some(self.supplies()));
+        self.imp().supplies_view.set_model(Some(&selection));
+
+        // Add columns to the view and create factories for each
+        self.setup_column(FieldType::String, "name", "Name");
+        self.setup_column(FieldType::String, "material", "Material");
+        self.setup_column(FieldType::F32, "price", "Price");
+        self.setup_column(FieldType::U32, "max-quantity", "Quantity");
+        self.setup_column(FieldType::String, "length-unit", "Unit");
+        self.setup_column(FieldType::F32, "length", "Length");
+    }
+
+    fn selection_model(&self) -> gtk::SelectionModel {
+        self.imp().supplies_view.model().unwrap()
+    }
+
+    fn supplies(&self) -> ListStore {
         self.imp().supplies.borrow().clone().unwrap()
     }
 
-    // TODO: Find a way to combine new_supply and new_parts_supply methods.x
-    fn new_supply(&self) {
-        // TODO: Get string directly from the combo box?
-        let length_unit = String::from(match self.imp().length_unit_field.selected() {
-            0 => "Inches",
-            1 => "Centimeters",
-            2 => "Meters",
-            _ => panic!(),
-        });
+    fn update_fields(&self) {
+        let selection = self.selection_model().selection();
+        if !selection.is_empty() {
+            let list_item = self.supplies().item(selection.minimum()).unwrap();
+            let supply_gobject = list_item.downcast_ref::<SupplyGObject>().unwrap();
 
-        // TODO: Improve invalid float handling
-        let supply = SupplyGObject::new(
-            self.imp().name_field.text().to_string(),
-            self.imp().material_field.text().to_string(),
-            self.imp().price_field.text().parse().unwrap_or(0.0),
-            self.imp().max_quantity_field.value() as u32,
-            length_unit,
-            self.imp().length_field.text().parse().unwrap_or(1.0),
-        );
-        self.supplies().append(&supply);
-
-        // Reset widgets
-        // self.imp().name_field.set_text("");
-        // self.imp().material_field.set_text("");
-        // self.imp().price_field.set_text("0.00");
-        // self.imp().max_quantity_field.set_value(0.0);
-        // self.imp().length_field.set_text("");
-
-        let model = self.imp().supplies_view.model().unwrap();
-        model.select_item(model.n_items() - 1, true);
+            // Set entry fields based on column view values
+            // TODO: Manual match is bad
+            let length_unit = match supply_gobject.length_unit().as_str() {
+                "Inches" => 0,
+                "Centimeters" => 1,
+                "Meters" => 2,
+                _ => panic!(),
+            };
+            let imp = self.imp();
+            imp.name_field.set_text(&supply_gobject.name());
+            imp.material_field.set_text(&supply_gobject.material());
+            imp.price_field
+                .set_text(&supply_gobject.price().to_string());
+            imp.max_quantity_field
+                .set_value(supply_gobject.max_quantity() as f64);
+            imp.length_unit_field.set_selected(length_unit);
+            imp.length_field
+                .set_text(&supply_gobject.length().to_string());
+        }
     }
 
-    // TODO: Find a way to combine new_supply and new_parts_supply methods.x
     fn update_supply(&self) {
-        // TODO: Do nothing if there is no active/selected row
-        // TODO: Does the selection index always match the index in the model?
-        let model = self.imp().supplies_view.model().unwrap();
-        let i = model.selection().minimum();
+        let selection_model = self.selection_model();
+        let selection = selection_model.selection();
+        if !selection.is_empty() {
+            let i = selection.minimum();
+            self.supplies().remove(i);
+            self.supplies().insert(i, &self.parse_fields());
 
-        // TODO: Get string directly from the combo box?
-        let length_unit = String::from(match self.imp().length_unit_field.selected() {
-            0 => "Inches",
-            1 => "Centimeters",
-            2 => "Meters",
-            _ => panic!(),
-        });
-
-        // TODO: Improve invalid float handling
-        let supply = SupplyGObject::new(
-            self.imp().name_field.text().to_string(),
-            self.imp().material_field.text().to_string(),
-            self.imp().price_field.text().parse().unwrap_or(0.0),
-            self.imp().max_quantity_field.value() as u32,
-            length_unit,
-            self.imp().length_field.text().parse().unwrap_or(1.0),
-        );
-        self.supplies().remove(i);
-        self.supplies().insert(i, &supply);
-        model.select_item(i, true);
+            // Select the item we just modified
+            selection_model.select_item(i, true);
+        }
     }
-}
-
-enum FactoryType {
-    NameFactory,
-    MaterialFactory,
-    PriceFactory,
-    MaxQuantityFactory,
-    LengthUnitFactory,
-    LengthFactory,
 }
