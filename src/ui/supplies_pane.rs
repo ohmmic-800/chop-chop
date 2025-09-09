@@ -75,6 +75,9 @@ mod imp {
             self.parent_constructed();
             self.obj().setup_column_view();
             self.obj().setup_callbacks();
+
+            // Otherwise higlighting is only applied after the first edit to a validated field
+            self.obj().validate_fields();
         }
     }
 
@@ -93,7 +96,7 @@ glib::wrapper! {
 
 impl SuppliesPane {
     fn add_supply(&self) {
-        self.supplies().append(&self.parse_fields());
+        self.supplies().append(&self.parse_all_fields());
 
         // Select the item we just added
         let selection_model = self.selection_model();
@@ -107,7 +110,15 @@ impl SuppliesPane {
         }
     }
 
-    fn parse_fields(&self) -> SupplyGObject {
+    fn highlight_field(field: &adw::EntryRow, is_valid: bool) {
+        if is_valid {
+            field.remove_css_class("invalid-entry");
+        } else {
+            field.add_css_class("invalid-entry");
+        }
+    }
+
+    fn parse_all_fields(&self) -> SupplyGObject {
         // TODO: Manual match is bad
         let length_unit = String::from(match self.imp().length_unit_field.selected() {
             0 => "Inches",
@@ -118,40 +129,73 @@ impl SuppliesPane {
         SupplyGObject::new(
             self.imp().name_field.text().to_string(),
             self.imp().material_field.text().to_string(),
-            self.imp().price_field.text().parse().unwrap_or(0.0),
+            self.parse_price().unwrap(),
             self.imp().max_quantity_field.value() as u32,
             length_unit,
-            self.imp().length_field.text().parse().unwrap_or(1.0),
+            self.parse_length().unwrap(),
         )
     }
 
+    fn parse_length(&self) -> Result<f32, ()> {
+        let length_field = &self.imp().length_field;
+        match length_field.text().parse() {
+            Ok(length) if length > 0.0 => Ok(length),
+            Ok(_) => Err(()),
+            Err(_) => Err(()),
+        }
+    }
+
+    fn parse_price(&self) -> Result<f32, ()> {
+        let field = &self.imp().price_field;
+        if field.text_length() == 0 {
+            return Ok(0.0);
+        }
+        match field.text().parse() {
+            Ok(price) => Ok(price),
+            Err(_) => Err(()),
+        }
+    }
+
     fn setup_callbacks(&self) {
+        for field in [
+            &self.imp().material_field,
+            &self.imp().price_field,
+            &self.imp().length_field,
+        ] {
+            field.connect_changed(clone!(
+                #[weak(rename_to = pane)]
+                self,
+                move |_| {
+                    pane.validate_fields();
+                }
+            ));
+        }
         self.imp().update_button.connect_clicked(clone!(
-            #[weak(rename_to = window)]
+            #[weak(rename_to = pane)]
             self,
             move |_| {
-                window.update_supply();
+                pane.update_supply();
             }
         ));
         self.imp().add_button.connect_clicked(clone!(
-            #[weak(rename_to = window)]
+            #[weak(rename_to = pane)]
             self,
             move |_| {
-                window.add_supply();
+                pane.add_supply();
             }
         ));
         self.imp().delete_button.connect_clicked(clone!(
-            #[weak(rename_to = window)]
+            #[weak(rename_to = pane)]
             self,
             move |_| {
-                window.delete_supply();
+                pane.delete_supply();
             }
         ));
         self.selection_model().connect_selection_changed(clone!(
-            #[weak(rename_to = window)]
+            #[weak(rename_to = pane)]
             self,
             move |_, _, _| {
-                window.update_fields();
+                pane.update_fields();
             }
         ));
     }
@@ -248,10 +292,30 @@ impl SuppliesPane {
         if !selection.is_empty() {
             let i = selection.minimum();
             self.supplies().remove(i);
-            self.supplies().insert(i, &self.parse_fields());
+            self.supplies().insert(i, &self.parse_all_fields());
 
             // Select the item we just modified
             selection_model.select_item(i, true);
         }
+    }
+
+    fn validate_fields(&self) {
+        let mut all_valid = true;
+
+        let valid = self.imp().material_field.text_length() != 0;
+        Self::highlight_field(&self.imp().material_field, valid);
+        all_valid = all_valid && valid;
+
+        let valid = self.parse_price().is_ok();
+        Self::highlight_field(&self.imp().price_field, valid);
+        all_valid = all_valid && valid;
+
+        let valid = self.parse_length().is_ok();
+        Self::highlight_field(&self.imp().length_field, valid);
+        all_valid = all_valid && valid;
+
+        // Disable update and add buttons if any field is invalid
+        self.imp().update_button.set_sensitive(all_valid);
+        self.imp().add_button.set_sensitive(all_valid);
     }
 }

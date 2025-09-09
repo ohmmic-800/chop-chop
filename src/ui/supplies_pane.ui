@@ -26,12 +26,12 @@
                 <child>
                   <object class="AdwEntryRow" id="material_field">
                     <property name="title">Material</property>
+                    <property name="text">Default</property>
                   </object>
                 </child>
                 <child>
                   <object class="AdwEntryRow" id="price_field">
                     <property name="title">Price</property>
-                    <property name="text">0.00</property>
                   </object>
                 </child>
                 <child>
