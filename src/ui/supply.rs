@@ -11,10 +11,10 @@ use std::cell::RefCell;
 pub struct SupplyData {
     pub name: String,
     pub material: String,
-    pub price: f32,
+    pub price: f64,
     pub max_quantity: u32,
     pub length_unit: String,
-    pub length: f32,
+    pub length: f64,
 }
 
 // Wrap SupplyData in a GObject so it can be used in a gtk::ListStore
@@ -28,10 +28,10 @@ mod imp {
     pub struct SupplyGObject {
         #[property(name = "name", get, set, type = String, member = name)]
         #[property(name = "material", get, set, type = String, member = material)]
-        #[property(name = "price", get, set, type = f32, member = price)]
+        #[property(name = "price", get, set, type = f64, member = price)]
         #[property(name = "max-quantity", get, set, type = u32, member = max_quantity)]
         #[property(name = "length-unit", get, set, type = String, member = length_unit)]
-        #[property(name = "length", get, set, type = f32, member = length)]
+        #[property(name = "length", get, set, type = f64, member = length)]
         pub data: RefCell<SupplyData>,
     }
 
@@ -55,10 +55,10 @@ impl SupplyGObject {
     pub fn new(
         name: String,
         material: String,
-        price: f32,
+        price: f64,
         max_quantity: u32,
         length_unit: String,
-        length: f32,
+        length: f64,
     ) -> Self {
         Object::builder()
             .property("name", name)

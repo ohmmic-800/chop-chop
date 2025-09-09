@@ -9,7 +9,7 @@ use super::supply::SupplyGObject;
 
 enum FieldType {
     String,
-    F32,
+    F64,
     U32,
 }
 
@@ -136,7 +136,7 @@ impl SuppliesPane {
         )
     }
 
-    fn parse_length(&self) -> Result<f32, ()> {
+    fn parse_length(&self) -> Result<f64, ()> {
         let length_field = &self.imp().length_field;
         match length_field.text().parse() {
             Ok(length) if length > 0.0 => Ok(length),
@@ -145,7 +145,7 @@ impl SuppliesPane {
         }
     }
 
-    fn parse_price(&self) -> Result<f32, ()> {
+    fn parse_price(&self) -> Result<f64, ()> {
         let field = &self.imp().price_field;
         if field.text_length() == 0 {
             return Ok(0.0);
@@ -224,7 +224,7 @@ impl SuppliesPane {
             let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
             let value = match field_type {
                 FieldType::String => supply_gobject.property::<String>(property),
-                FieldType::F32 => supply_gobject.property::<f32>(property).to_string(),
+                FieldType::F64 => supply_gobject.property::<f64>(property).to_string(),
                 FieldType::U32 => supply_gobject.property::<u32>(property).to_string(),
             };
             label.set_label(&value);
@@ -252,10 +252,10 @@ impl SuppliesPane {
         // Add columns to the view and create factories for each
         self.setup_column(FieldType::String, "name", "Name");
         self.setup_column(FieldType::String, "material", "Material");
-        self.setup_column(FieldType::F32, "price", "Price");
+        self.setup_column(FieldType::F64, "price", "Price");
         self.setup_column(FieldType::U32, "max-quantity", "Quantity");
         self.setup_column(FieldType::String, "length-unit", "Unit");
-        self.setup_column(FieldType::F32, "length", "Length");
+        self.setup_column(FieldType::F64, "length", "Length");
     }
 
     fn selection_model(&self) -> gtk::SelectionModel {

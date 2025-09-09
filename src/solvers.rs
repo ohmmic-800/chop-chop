@@ -11,5 +11,5 @@ pub trait Solver {
 pub struct Solution {
     cut_lists: Vec<CutList>,
     supply_consumption: Vec<u32>,
-    total_price: f32,
+    total_price: f64,
 }

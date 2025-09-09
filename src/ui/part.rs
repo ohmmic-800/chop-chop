@@ -13,7 +13,7 @@ pub struct PartData {
     pub material: String,
     pub max_quantity: u32,
     pub length_unit: String,
-    pub length: f32,
+    pub length: f64,
 }
 
 // Wrap PartData in a GObject so it can be used in a gtk::ListStore
@@ -29,7 +29,7 @@ mod imp {
         #[property(name = "material", get, set, type = String, member = material)]
         #[property(name = "max-quantity", get, set, type = u32, member = max_quantity)]
         #[property(name = "length-unit", get, set, type = String, member = length_unit)]
-        #[property(name = "length", get, set, type = f32, member = length)]
+        #[property(name = "length", get, set, type = f64, member = length)]
         pub data: RefCell<PartData>,
     }
 
@@ -55,7 +55,7 @@ impl PartGObject {
         material: String,
         max_quantity: u32,
         length_unit: String,
-        length: f32,
+        length: f64,
     ) -> Self {
         Object::builder()
             .property("name", name)

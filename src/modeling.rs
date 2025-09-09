@@ -6,10 +6,10 @@
 #[derive(Debug)]
 pub struct Supply {
     pub material: String,
-    pub length: f32,
+    pub length: f64,
 
     /// Zero indicates that the material is on-hand (free)
-    pub price: f32,
+    pub price: f64,
 
     /// Zero indicates that the supply is unlimited
     pub max_quantity: u32,
@@ -21,7 +21,7 @@ pub struct Supply {
 #[derive(Debug)]
 pub struct Part {
     pub material: String,
-    pub length: f32,
+    pub length: f64,
     pub quantity: u32,
 }
 
@@ -33,7 +33,7 @@ pub struct CutList {
     pub material: String,
 
     /// The original length before cutting
-    pub length: f32,
+    pub length: f64,
 
-    pub cuts: Vec<f32>,
+    pub cuts: Vec<f64>,
 }
