@@ -198,6 +198,13 @@ impl SuppliesPane {
                 pane.update_fields();
             }
         ));
+        self.selection_model().connect_items_changed(clone!(
+            #[weak(rename_to = pane)]
+            self,
+            move |_, _, _, _| {
+                pane.update_fields();
+            }
+        ));
     }
 
     fn setup_column(&self, field_type: FieldType, property: &'static str, column_title: &str) {
