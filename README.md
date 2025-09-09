@@ -32,18 +32,19 @@ cargo test -- --nocapture
 
 ### Short-Term
 
-- [ ] Split `window.rs` into multiple files (one per pane)
-- [ ] Finish editing UI
-    - [ ] Update entry widgets when selecting a new row
-    - [ ] The "update" button saves changes to the selected row
-    - [ ] The "add new" button saves changes to a new row
-    - [ ] Add "delete" button
-    - [ ] Discard pending changes when a new row is selected
+- [x] Split `window.rs` into multiple files (one per pane)
+- [x] Finish editing UI
+    - [x] Update entry widgets when selecting a new row
+    - [x] The "update" button saves changes to the selected row
+    - [x] The "add new" button saves changes to a new row
+    - [x] Add "delete" button
+    - [x] Discard pending changes when a new row is selected
 - [ ] Validate entry fields
     - [ ] Highlight invalid entries with red border
     - [ ] Don't allow saving changes if there is an invalid entry (show a popup)
     - [ ] Price must be a decimal number
     - [ ] Length can be a decimal number or fraction
+- [ ] Carry changes over to parts pane (avoiding repeated code)
 - [ ] Add unit conversions
 - [ ] Parse fractions in length units
 - [ ] Use a split field for ft+in
