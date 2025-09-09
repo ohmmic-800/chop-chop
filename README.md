@@ -39,11 +39,9 @@ cargo test -- --nocapture
     - [x] The "add new" button saves changes to a new row
     - [x] Add "delete" button
     - [x] Discard pending changes when a new row is selected
-- [ ] Validate entry fields
-    - [ ] Highlight invalid entries with red border
-    - [ ] Don't allow saving changes if there is an invalid entry (show a popup)
-    - [ ] Price must be a decimal number
-    - [ ] Length can be a decimal number or fraction
+- [x] Validate entry fields
+    - [x] Highlight invalid entries with red or yellow border
+    - [x] Don't allow saving changes if there is an invalid entry
 - [ ] Carry changes over to parts pane (avoiding repeated code)
 - [ ] Add unit conversions
 - [ ] Parse fractions in length units
