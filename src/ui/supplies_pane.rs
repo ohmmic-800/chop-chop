@@ -212,6 +212,7 @@ impl SuppliesPane {
             self,
             move |_| {
                 pane.delete_supply();
+                pane.update_fields();
             }
         ));
         self.selection_model().connect_selection_changed(clone!(
@@ -225,7 +226,6 @@ impl SuppliesPane {
             #[weak(rename_to = pane)]
             self,
             move |_, _, _, _| {
-                pane.update_fields();
                 pane.update_content_stack();
             }
         ));
