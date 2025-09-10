@@ -42,15 +42,16 @@ cargo test -- --nocapture
 - [x] Validate entry fields
     - [x] Highlight invalid entries with red or yellow border
     - [x] Don't allow saving changes if there is an invalid entry
-- [ ] Carry changes over to parts pane (avoiding repeated code)
-- [ ] Add unit conversions
+- [x] Show a graphic/instructions if there are no rows
 - [ ] Parse fractions in length units
-- [ ] Use a split field for ft+in
-- [ ] Show a suggestion drop-down for materials (existing materials)
-- [ ] Improve window  scaling behavior (no hard-coded widths)
+- [ ] Add unit conversions
 - [ ] Adjust column widths
 - [ ] Improve column value formatting (currency symbol for price, combined length column)
-- [ ] Show a graphic/instructions if there are no rows
+- [ ] Use a split field for ft+in
+- [ ] Add basic keyboard shortcuts (for three button actions)
+- [ ] Carry changes over to parts pane (avoiding repeated code)
+- [ ] Show a suggestion drop-down for materials (existing materials)
+- [ ] Improve window scaling behavior (no hard-coded widths)
 - [ ] Show a graphic/instructions if there are no solver results
 
 ### Long-Term

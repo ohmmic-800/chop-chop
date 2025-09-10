@@ -42,6 +42,10 @@ mod imp {
         #[template_child]
         pub delete_button: TemplateChild<gtk::Button>,
 
+        // Used to switch between the column view and a placeholder
+        #[template_child]
+        pub content_stack: TemplateChild<gtk::Stack>,
+
         // Column view
         #[template_child]
         pub supplies_view: TemplateChild<gtk::ColumnView>,
@@ -75,6 +79,7 @@ mod imp {
             self.parent_constructed();
             self.obj().setup_column_view();
             self.obj().setup_callbacks();
+            self.obj().update_content_stack();
 
             // Otherwise higlighting is only applied after the first edit to a validated field
             self.obj().validate_fields();
@@ -198,11 +203,12 @@ impl SuppliesPane {
                 pane.update_fields();
             }
         ));
-        self.selection_model().connect_items_changed(clone!(
+        self.supplies().connect_items_changed(clone!(
             #[weak(rename_to = pane)]
             self,
             move |_, _, _, _| {
                 pane.update_fields();
+                pane.update_content_stack();
             }
         ));
     }
@@ -303,6 +309,15 @@ impl SuppliesPane {
 
             // Select the item we just modified
             selection_model.select_item(i, true);
+        }
+    }
+
+    fn update_content_stack(&self) {
+        let content_stack = &self.imp().content_stack;
+        if self.supplies().n_items() == 0 {
+            content_stack.set_visible_child_name("placeholder");
+        } else {
+            content_stack.set_visible_child_name("nonempty");
         }
     }
 
