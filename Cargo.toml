@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 adw = { version = "0.8.0", package = "libadwaita", features = ["v1_5"] }
 async-channel = "2.5.0"
+fraction = "0.15.3"
 gtk = { version = "0.10.0", package = "gtk4", features = ["v4_18"] }
 pango = "0.21.1"
 pangocairo = "0.21.1"

@@ -14,7 +14,10 @@ pub struct SupplyData {
     pub price: f64,
     pub max_quantity: u32,
     pub length_unit: String,
-    pub length: f64,
+
+    // Store the user-entered string instead of a parsed fraction::Fraction. This allows subsequent
+    // edits in the original format and avoids headaches with storing custom types in a GObject.
+    pub length: String,
 }
 
 // Wrap SupplyData in a GObject so it can be used in a gtk::ListStore
@@ -31,7 +34,7 @@ mod imp {
         #[property(name = "price", get, set, type = f64, member = price)]
         #[property(name = "max-quantity", get, set, type = u32, member = max_quantity)]
         #[property(name = "length-unit", get, set, type = String, member = length_unit)]
-        #[property(name = "length", get, set, type = f64, member = length)]
+        #[property(name = "length", get, set, type = String, member = length)]
         pub data: RefCell<SupplyData>,
     }
 
@@ -58,7 +61,7 @@ impl SupplyGObject {
         price: f64,
         max_quantity: u32,
         length_unit: String,
-        length: f64,
+        length: String,
     ) -> Self {
         Object::builder()
             .property("name", name)

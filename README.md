@@ -43,10 +43,10 @@ cargo test -- --nocapture
     - [x] Highlight invalid entries with red or yellow border
     - [x] Don't allow saving changes if there is an invalid entry
 - [x] Show a graphic/instructions if there are no rows
-- [ ] Parse fractions in length units
-- [ ] Add unit conversions
+- [x] Parse fractions in length units
 - [ ] Adjust column widths
 - [ ] Improve column value formatting (currency symbol for price, combined length column)
+- [ ] Add unit conversions
 - [ ] Use a split field for ft+in
 - [ ] Add basic keyboard shortcuts (for three button actions)
 - [ ] Carry changes over to parts pane (avoiding repeated code)
@@ -56,6 +56,7 @@ cargo test -- --nocapture
 
 ### Long-Term
 
+- [ ] Allow configuring fraction display format
 - [ ] Show a popup if selecting a new row would discard changes (config option?)
 - [ ] Define algorithm spec so people can add their own
 - [ ] Allow sorting columns ascending/descending

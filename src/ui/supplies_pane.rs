@@ -1,7 +1,9 @@
 use std::cell::RefCell;
+use std::str::FromStr;
 
 use adw::prelude::*;
 use adw::subclass::prelude::*;
+use fraction::Fraction;
 use gtk::glib::{clone, subclass::InitializingObject};
 use gtk::{gio::ListStore, glib};
 
@@ -11,6 +13,7 @@ enum FieldType {
     String,
     F64,
     U32,
+    Fraction,
 }
 
 mod imp {
@@ -115,6 +118,14 @@ impl SuppliesPane {
         }
     }
 
+    /// Panics if parse_length(text) returns an error
+    fn format_fraction(text: &str) -> String {
+        // TODO: Make format configurable (original format, fraction, mixed, or decimal)
+        // May require making this a method
+        // https://docs.rs/fraction/latest/fraction/#format-convert-to-string
+        format!("{:.10}", Self::parse_length(text).unwrap())
+    }
+
     fn highlight_field(field: &adw::EntryRow, is_valid: bool) {
         if is_valid {
             field.remove_css_class("invalid-entry");
@@ -134,28 +145,35 @@ impl SuppliesPane {
         SupplyGObject::new(
             self.imp().name_field.text().to_string(),
             self.imp().material_field.text().to_string(),
-            self.parse_price().unwrap(),
+            Self::parse_price(&self.imp().price_field.text()).unwrap(),
             self.imp().max_quantity_field.value() as u32,
             length_unit,
-            self.parse_length().unwrap(),
+            self.imp().length_field.text().to_string(),
         )
     }
 
-    fn parse_length(&self) -> Result<f64, ()> {
-        let length_field = &self.imp().length_field;
-        match length_field.text().parse() {
-            Ok(length) if length > 0.0 => Ok(length),
-            Ok(_) => Err(()),
-            Err(_) => Err(()),
+    /// Allows for an arbitrary number of fraction terms (not limited to <= 2)
+    fn parse_length(text: &str) -> Result<Fraction, ()> {
+        let text = text.trim();
+        if text.is_empty() {
+            return Err(());
         }
+        let mut length = Fraction::from(0);
+        for token in text.split(" ") {
+            length += match Fraction::from_str(token) {
+                Ok(value) => value,
+                Err(_) => return Err(()),
+            };
+        }
+        Ok(length)
     }
 
-    fn parse_price(&self) -> Result<f64, ()> {
-        let field = &self.imp().price_field;
-        if field.text_length() == 0 {
+    fn parse_price(text: &str) -> Result<f64, ()> {
+        let text = text.trim();
+        if text.is_empty() {
             return Ok(0.0);
         }
-        match field.text().parse() {
+        match text.parse() {
             Ok(price) => Ok(price),
             Err(_) => Err(()),
         }
@@ -232,6 +250,9 @@ impl SuppliesPane {
                 FieldType::String => supply_gobject.property::<String>(property),
                 FieldType::F64 => supply_gobject.property::<f64>(property).to_string(),
                 FieldType::U32 => supply_gobject.property::<u32>(property).to_string(),
+                FieldType::Fraction => {
+                    Self::format_fraction(&supply_gobject.property::<String>(property))
+                }
             };
             label.set_label(&value);
         });
@@ -261,7 +282,7 @@ impl SuppliesPane {
         self.setup_column(FieldType::F64, "price", "Price");
         self.setup_column(FieldType::U32, "max-quantity", "Quantity");
         self.setup_column(FieldType::String, "length-unit", "Unit");
-        self.setup_column(FieldType::F64, "length", "Length");
+        self.setup_column(FieldType::Fraction, "length", "Length");
     }
 
     fn selection_model(&self) -> gtk::SelectionModel {
@@ -294,8 +315,7 @@ impl SuppliesPane {
             imp.max_quantity_field
                 .set_value(supply_gobject.max_quantity() as f64);
             imp.length_unit_field.set_selected(length_unit);
-            imp.length_field
-                .set_text(&supply_gobject.length().to_string());
+            imp.length_field.set_text(&supply_gobject.length());
         }
     }
 
@@ -328,12 +348,14 @@ impl SuppliesPane {
         Self::highlight_field(&self.imp().material_field, valid);
         all_valid = all_valid && valid;
 
-        let valid = self.parse_price().is_ok();
-        Self::highlight_field(&self.imp().price_field, valid);
+        let price_field = &self.imp().price_field;
+        let valid = Self::parse_price(&price_field.text()).is_ok();
+        Self::highlight_field(price_field, valid);
         all_valid = all_valid && valid;
 
-        let valid = self.parse_length().is_ok();
-        Self::highlight_field(&self.imp().length_field, valid);
+        let length_field = &self.imp().length_field;
+        let valid = Self::parse_length(&length_field.text()).is_ok();
+        Self::highlight_field(length_field, valid);
         all_valid = all_valid && valid;
 
         // Disable update and add buttons if any field is invalid
