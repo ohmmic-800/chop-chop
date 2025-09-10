@@ -1,5 +1,5 @@
 .invalid-entry {
-    /* Can also try --error-color here */
-    color: var(--warning-color);
-    outline-color: var(--warning-color);
+    /* Can also try --warning-color here */
+    color: var(--error-color);
+    outline-color: var(--error-color);
 }
