@@ -46,12 +46,12 @@ cargo test -- --nocapture
 - [x] Parse fractions in length units
 - [x] Use a split field for ft+in
 - [x] Improve column value formatting (currency symbol for price, combined length column)
-- [ ] Adjust column widths
+- [x] Adjust column widths
+- [x] Improve window scaling behavior
 - [ ] Show a suggestion drop-down for materials (existing materials)
 - [ ] Add basic keyboard shortcuts (for three button actions)
 - [ ] Carry changes over to parts pane (avoiding repeated code)
 - [ ] Add unit conversions
-- [ ] Improve window scaling behavior (no hard-coded widths)
 - [ ] Show a graphic/instructions if there are no solver results
 
 ### Long-Term
