@@ -16,7 +16,7 @@ pub struct SupplyData {
     pub name: String,
     pub material: String,
     pub price: String,
-    pub max_quantity: u32,
+    pub quantity: String,
     pub length_unit: u32,
     pub length: String,
     pub sublength: String,
@@ -34,7 +34,7 @@ mod imp {
         #[property(name = "name", get, set, type = String, member = name)]
         #[property(name = "material", get, set, type = String, member = material)]
         #[property(name = "price", get, set, type = String, member = price)]
-        #[property(name = "max-quantity", get, set, type = u32, member = max_quantity)]
+        #[property(name = "quantity", get, set, type = String, member = quantity)]
         #[property(name = "length-unit", get, set, type = u32, member = length_unit)]
         #[property(name = "length", get, set, type = String, member = length)]
         #[property(name = "sublength", get, set, type = String, member = sublength)]
@@ -62,7 +62,7 @@ impl SupplyGObject {
         name: String,
         material: String,
         price: String,
-        max_quantity: u32,
+        quantity: String,
         length_unit: u32,
         length: String,
         sublength: String,
@@ -71,7 +71,7 @@ impl SupplyGObject {
             .property("name", name)
             .property("material", material)
             .property("price", price)
-            .property("max-quantity", max_quantity)
+            .property("quantity", quantity)
             .property("length_unit", length_unit)
             .property("length", length)
             .property("sublength", sublength)

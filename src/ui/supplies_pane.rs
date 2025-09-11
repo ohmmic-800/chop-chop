@@ -26,7 +26,7 @@ mod imp {
         #[template_child]
         pub price_field: TemplateChild<adw::EntryRow>,
         #[template_child]
-        pub max_quantity_field: TemplateChild<adw::SpinRow>,
+        pub quantity_field: TemplateChild<adw::EntryRow>,
         #[template_child]
         pub length_unit_field: TemplateChild<adw::ComboRow>,
         #[template_child]
@@ -127,15 +127,6 @@ impl SuppliesPane {
         }
     }
 
-    fn format_quantity(supply_gobject: &SupplyGObject) -> String {
-        let quantity = supply_gobject.max_quantity();
-        if quantity == 0 {
-            String::from("Unlimited")
-        } else {
-            quantity.to_string()
-        }
-    }
-
     fn format_length(supply_gobject: &SupplyGObject) -> String {
         let mut output = Self::format_fraction(&supply_gobject.length());
         output += match supply_gobject.length_unit() {
@@ -151,20 +142,21 @@ impl SuppliesPane {
         output
     }
 
-    fn format_material(supply_gobject: &SupplyGObject) -> String {
-        supply_gobject.material()
-    }
-
-    fn format_name(supply_gobject: &SupplyGObject) -> String {
-        supply_gobject.name()
-    }
-
     fn format_price(supply_gobject: &SupplyGObject) -> String {
         let price = Self::parse_price(&supply_gobject.price()).unwrap();
         if price == Decimal::zero() {
             String::from("Free")
         } else {
             format!("${:.2}", price)
+        }
+    }
+
+    fn format_quantity(supply_gobject: &SupplyGObject) -> String {
+        let quantity = Self::parse_quantity(&supply_gobject.quantity()).unwrap();
+        if quantity == 0 {
+            String::from("Unlimited")
+        } else {
+            quantity.to_string()
         }
     }
 
@@ -181,7 +173,7 @@ impl SuppliesPane {
             self.imp().name_field.text().to_string(),
             self.imp().material_field.text().to_string(),
             self.imp().price_field.text().to_string(),
-            self.imp().max_quantity_field.value() as u32,
+            self.imp().quantity_field.text().to_string(),
             self.imp().length_unit_field.selected(),
             self.imp().length_field.text().to_string(),
             self.imp().sublength_field.text().to_string(),
@@ -204,6 +196,17 @@ impl SuppliesPane {
         Ok(length)
     }
 
+    fn parse_quantity(text: &str) -> Result<u32, ()> {
+        let text = text.trim();
+        if text.is_empty() {
+            return Ok(0);
+        }
+        match text.parse::<u32>() {
+            Ok(value) => Ok(value),
+            Err(_) => Err(()),
+        }
+    }
+
     fn parse_price(text: &str) -> Result<Decimal, ()> {
         let text = text.trim();
         if text.is_empty() {
@@ -223,6 +226,7 @@ impl SuppliesPane {
         for field in [
             &self.imp().material_field,
             &self.imp().price_field,
+            &self.imp().quantity_field,
             &self.imp().length_field,
             &self.imp().sublength_field,
         ] {
@@ -318,8 +322,8 @@ impl SuppliesPane {
         self.imp().supplies_view.set_model(Some(&selection));
 
         // Add columns to the view and create factories for each
-        self.setup_column(Self::format_name, "Name");
-        self.setup_column(Self::format_material, "Material");
+        self.setup_column(SupplyGObject::name, "Name");
+        self.setup_column(SupplyGObject::material, "Material");
         self.setup_column(Self::format_price, "Price");
         self.setup_column(Self::format_quantity, "Quantity");
         self.setup_column(Self::format_length, "Length");
@@ -348,10 +352,8 @@ impl SuppliesPane {
             let imp = self.imp();
             imp.name_field.set_text(&supply_gobject.name());
             imp.material_field.set_text(&supply_gobject.material());
-            imp.price_field
-                .set_text(&supply_gobject.price().to_string());
-            imp.max_quantity_field
-                .set_value(supply_gobject.max_quantity() as f64);
+            imp.price_field.set_text(&supply_gobject.price());
+            imp.quantity_field.set_text(&supply_gobject.quantity());
             imp.length_field.set_text(&supply_gobject.length());
             imp.sublength_field.set_text(&supply_gobject.sublength());
 
@@ -403,6 +405,11 @@ impl SuppliesPane {
         let price_field = &self.imp().price_field;
         let valid = Self::parse_price(&price_field.text()).is_ok();
         Self::highlight_field(price_field, valid);
+        all_valid = all_valid && valid;
+
+        let quantity_field = &self.imp().quantity_field;
+        let valid = Self::parse_quantity(&quantity_field.text()).is_ok();
+        Self::highlight_field(quantity_field, valid);
         all_valid = all_valid && valid;
 
         let length_field = &self.imp().length_field;
