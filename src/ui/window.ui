@@ -3,8 +3,8 @@
   <requires lib="gtk" version="4.10" />
   <requires lib="libadwaita" version="1.4" />
   <template class="ChopChopWindow" parent="AdwApplicationWindow">
-    <property name="default-width">1100</property>
-    <property name="default-height">825</property>
+    <property name="default-width">1000</property>
+    <property name="default-height">800</property>
     <property name="title">Chop-Chop</property>
     <child>
       <object class="GtkBox" id="content">
