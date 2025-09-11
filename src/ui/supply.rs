@@ -7,16 +7,17 @@ use std::cell::RefCell;
 /// Represents the user-entered data for a supply row
 ///
 /// Units need to be normalized before converting to crate::modeling::Supply
+///
+/// Stores user-entered strings instead of parsed numeric types (fraction::Decimal or
+/// fraction::Fraction). This allows editing the original text when a row is re-selected, and avoids
+/// headaches with storing custom types in a GObject.
 #[derive(Default)]
 pub struct SupplyData {
     pub name: String,
     pub material: String,
-    pub price: f64,
+    pub price: String,
     pub max_quantity: u32,
     pub length_unit: u32,
-
-    // Store the user-entered string instead of a parsed fraction::Fraction. This allows subsequent
-    // edits in the original format and avoids headaches with storing custom types in a GObject.
     pub length: String,
     pub sublength: String,
 }
@@ -32,7 +33,7 @@ mod imp {
     pub struct SupplyGObject {
         #[property(name = "name", get, set, type = String, member = name)]
         #[property(name = "material", get, set, type = String, member = material)]
-        #[property(name = "price", get, set, type = f64, member = price)]
+        #[property(name = "price", get, set, type = String, member = price)]
         #[property(name = "max-quantity", get, set, type = u32, member = max_quantity)]
         #[property(name = "length-unit", get, set, type = u32, member = length_unit)]
         #[property(name = "length", get, set, type = String, member = length)]
@@ -60,7 +61,7 @@ impl SupplyGObject {
     pub fn new(
         name: String,
         material: String,
-        price: f64,
+        price: String,
         max_quantity: u32,
         length_unit: u32,
         length: String,

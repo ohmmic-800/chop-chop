@@ -3,21 +3,13 @@ use std::str::FromStr;
 
 use adw::prelude::*;
 use adw::subclass::prelude::*;
-use fraction::Fraction;
+use fraction::{Decimal, Fraction, Zero};
 use gtk::glib::{clone, subclass::InitializingObject};
 use gtk::{gio::ListStore, glib};
 
 use super::supply::SupplyGObject;
 
 // TOOD: Optimize creation of new String object (as opposed to passing &str refs)
-
-enum FieldType {
-    String,
-    F64,
-    U32,
-    Unit,
-    Fraction,
-}
 
 mod imp {
     use super::*;
@@ -135,6 +127,47 @@ impl SuppliesPane {
         }
     }
 
+    fn format_quantity(supply_gobject: &SupplyGObject) -> String {
+        let quantity = supply_gobject.max_quantity();
+        if quantity == 0 {
+            String::from("Unlimited")
+        } else {
+            quantity.to_string()
+        }
+    }
+
+    fn format_length(supply_gobject: &SupplyGObject) -> String {
+        let mut output = Self::format_fraction(&supply_gobject.length());
+        output += match supply_gobject.length_unit() {
+            0 => "ft",
+            1 => "in",
+            2 => "m",
+            3 => "cm",
+            _ => panic!(),
+        };
+        if supply_gobject.length_unit() == 0 {
+            output += &format!(" {}in", &Self::format_fraction(&supply_gobject.sublength()));
+        }
+        output
+    }
+
+    fn format_material(supply_gobject: &SupplyGObject) -> String {
+        supply_gobject.material()
+    }
+
+    fn format_name(supply_gobject: &SupplyGObject) -> String {
+        supply_gobject.name()
+    }
+
+    fn format_price(supply_gobject: &SupplyGObject) -> String {
+        let price = Self::parse_price(&supply_gobject.price()).unwrap();
+        if price == Decimal::zero() {
+            String::from("Free")
+        } else {
+            format!("${:.2}", price)
+        }
+    }
+
     fn highlight_field(field: &adw::EntryRow, is_valid: bool) {
         if is_valid {
             field.remove_css_class("invalid-entry");
@@ -147,7 +180,7 @@ impl SuppliesPane {
         SupplyGObject::new(
             self.imp().name_field.text().to_string(),
             self.imp().material_field.text().to_string(),
-            Self::parse_price(&self.imp().price_field.text()).unwrap(),
+            self.imp().price_field.text().to_string(),
             self.imp().max_quantity_field.value() as u32,
             self.imp().length_unit_field.selected(),
             self.imp().length_field.text().to_string(),
@@ -161,7 +194,7 @@ impl SuppliesPane {
         if text.is_empty() {
             return Err(());
         }
-        let mut length = Fraction::from(0);
+        let mut length = Fraction::zero();
         for token in text.split(" ") {
             length += match Fraction::from_str(token) {
                 Ok(value) => value,
@@ -171,15 +204,19 @@ impl SuppliesPane {
         Ok(length)
     }
 
-    fn parse_price(text: &str) -> Result<f64, ()> {
+    fn parse_price(text: &str) -> Result<Decimal, ()> {
         let text = text.trim();
         if text.is_empty() {
-            return Ok(0.0);
+            return Ok(Decimal::zero());
         }
-        match text.parse() {
-            Ok(price) => Ok(price),
+        match Decimal::from_str(text) {
+            Ok(value) => Ok(value),
             Err(_) => Err(()),
         }
+    }
+
+    fn selection_model(&self) -> gtk::SelectionModel {
+        self.imp().supplies_view.model().unwrap()
     }
 
     fn setup_callbacks(&self) {
@@ -243,7 +280,7 @@ impl SuppliesPane {
         ));
     }
 
-    fn setup_column(&self, field_type: FieldType, property: &'static str, column_title: &str) {
+    fn setup_column(&self, format_column_fn: fn(&SupplyGObject) -> String, column_title: &str) {
         let factory = gtk::SignalListItemFactory::new();
 
         // Called when a new row of widgets is added
@@ -258,23 +295,7 @@ impl SuppliesPane {
             let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
             let supply_gobject = list_item.item().and_downcast::<SupplyGObject>().unwrap();
             let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            let value = match field_type {
-                FieldType::String => supply_gobject.property::<String>(property),
-                FieldType::F64 => supply_gobject.property::<f64>(property).to_string(),
-                FieldType::U32 => supply_gobject.property::<u32>(property).to_string(),
-                FieldType::Fraction => {
-                    Self::format_fraction(&supply_gobject.property::<String>(property))
-                }
-                // TODO: Manual match is bad
-                FieldType::Unit => String::from(match supply_gobject.property::<u32>(property) {
-                    0 => "Feet and inches",
-                    1 => "Inches",
-                    2 => "Meters",
-                    3 => "Centimeters",
-                    _ => panic!(),
-                }),
-            };
-            label.set_label(&value);
+            label.set_label(&format_column_fn(&supply_gobject));
         });
 
         // Create a column and add it to the view
@@ -297,21 +318,24 @@ impl SuppliesPane {
         self.imp().supplies_view.set_model(Some(&selection));
 
         // Add columns to the view and create factories for each
-        self.setup_column(FieldType::String, "name", "Name");
-        self.setup_column(FieldType::String, "material", "Material");
-        self.setup_column(FieldType::F64, "price", "Price");
-        self.setup_column(FieldType::U32, "max-quantity", "Quantity");
-        self.setup_column(FieldType::Unit, "length-unit", "Unit");
-        self.setup_column(FieldType::Fraction, "length", "Length");
-        self.setup_column(FieldType::Fraction, "sublength", "Sublength");
-    }
-
-    fn selection_model(&self) -> gtk::SelectionModel {
-        self.imp().supplies_view.model().unwrap()
+        self.setup_column(Self::format_name, "Name");
+        self.setup_column(Self::format_material, "Material");
+        self.setup_column(Self::format_price, "Price");
+        self.setup_column(Self::format_quantity, "Quantity");
+        self.setup_column(Self::format_length, "Length");
     }
 
     fn supplies(&self) -> ListStore {
         self.imp().supplies.borrow().clone().unwrap()
+    }
+
+    fn update_content_stack(&self) {
+        let content_stack = &self.imp().content_stack;
+        if self.supplies().n_items() == 0 {
+            content_stack.set_visible_child_name("placeholder");
+        } else {
+            content_stack.set_visible_child_name("nonempty");
+        }
     }
 
     fn update_fields(&self) {
@@ -337,32 +361,6 @@ impl SuppliesPane {
         }
     }
 
-    fn update_supply(&self) {
-        let selection_model = self.selection_model();
-        let selection = selection_model.selection();
-        if !selection.is_empty() {
-            let i = selection.minimum();
-            self.supplies().remove(i);
-            self.supplies().insert(i, &self.parse_all_fields());
-
-            // Select the item we just modified
-            selection_model.select_item(i, true);
-        }
-    }
-
-    fn update_content_stack(&self) {
-        let content_stack = &self.imp().content_stack;
-        if self.supplies().n_items() == 0 {
-            content_stack.set_visible_child_name("placeholder");
-        } else {
-            content_stack.set_visible_child_name("nonempty");
-        }
-    }
-
-    fn use_sublength(&self) -> bool {
-        self.imp().length_unit_field.selected() == 0
-    }
-
     fn update_length_unit(&self) {
         let sublength_field = &self.imp().sublength_field;
         if self.use_sublength() {
@@ -376,6 +374,23 @@ impl SuppliesPane {
             0 => "Feet",
             _ => "Length",
         });
+    }
+
+    fn update_supply(&self) {
+        let selection_model = self.selection_model();
+        let selection = selection_model.selection();
+        if !selection.is_empty() {
+            let i = selection.minimum();
+            self.supplies().remove(i);
+            self.supplies().insert(i, &self.parse_all_fields());
+
+            // Select the item we just modified
+            selection_model.select_item(i, true);
+        }
+    }
+
+    fn use_sublength(&self) -> bool {
+        self.imp().length_unit_field.selected() == 0
     }
 
     fn validate_fields(&self) {
