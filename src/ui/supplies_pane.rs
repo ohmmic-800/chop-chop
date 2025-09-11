@@ -9,10 +9,13 @@ use gtk::{gio::ListStore, glib};
 
 use super::supply::SupplyGObject;
 
+// TOOD: Optimize creation of new String object (as opposed to passing &str refs)
+
 enum FieldType {
     String,
     F64,
     U32,
+    Unit,
     Fraction,
 }
 
@@ -36,6 +39,8 @@ mod imp {
         pub length_unit_field: TemplateChild<adw::ComboRow>,
         #[template_child]
         pub length_field: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub sublength_field: TemplateChild<adw::EntryRow>,
 
         // Buttons
         #[template_child]
@@ -123,7 +128,11 @@ impl SuppliesPane {
         // TODO: Make format configurable (original format, fraction, mixed, or decimal)
         // May require making this a method
         // https://docs.rs/fraction/latest/fraction/#format-convert-to-string
-        format!("{:.10}", Self::parse_length(text).unwrap())
+        if text.is_empty() {
+            String::from("")
+        } else {
+            format!("{:.10}", Self::parse_length(text).unwrap())
+        }
     }
 
     fn highlight_field(field: &adw::EntryRow, is_valid: bool) {
@@ -135,20 +144,14 @@ impl SuppliesPane {
     }
 
     fn parse_all_fields(&self) -> SupplyGObject {
-        // TODO: Manual match is bad
-        let length_unit = String::from(match self.imp().length_unit_field.selected() {
-            0 => "Inches",
-            1 => "Centimeters",
-            2 => "Meters",
-            _ => panic!(),
-        });
         SupplyGObject::new(
             self.imp().name_field.text().to_string(),
             self.imp().material_field.text().to_string(),
             Self::parse_price(&self.imp().price_field.text()).unwrap(),
             self.imp().max_quantity_field.value() as u32,
-            length_unit,
+            self.imp().length_unit_field.selected(),
             self.imp().length_field.text().to_string(),
+            self.imp().sublength_field.text().to_string(),
         )
     }
 
@@ -184,6 +187,7 @@ impl SuppliesPane {
             &self.imp().material_field,
             &self.imp().price_field,
             &self.imp().length_field,
+            &self.imp().sublength_field,
         ] {
             field.connect_changed(clone!(
                 #[weak(rename_to = pane)]
@@ -193,6 +197,14 @@ impl SuppliesPane {
                 }
             ));
         }
+        self.imp().length_unit_field.connect_selected_notify(clone!(
+            #[weak(rename_to = pane)]
+            self,
+            move |_| {
+                pane.update_length_unit();
+                pane.validate_fields();
+            }
+        ));
         self.imp().update_button.connect_clicked(clone!(
             #[weak(rename_to = pane)]
             self,
@@ -253,6 +265,14 @@ impl SuppliesPane {
                 FieldType::Fraction => {
                     Self::format_fraction(&supply_gobject.property::<String>(property))
                 }
+                // TODO: Manual match is bad
+                FieldType::Unit => String::from(match supply_gobject.property::<u32>(property) {
+                    0 => "Feet and inches",
+                    1 => "Inches",
+                    2 => "Meters",
+                    3 => "Centimeters",
+                    _ => panic!(),
+                }),
             };
             label.set_label(&value);
         });
@@ -281,8 +301,9 @@ impl SuppliesPane {
         self.setup_column(FieldType::String, "material", "Material");
         self.setup_column(FieldType::F64, "price", "Price");
         self.setup_column(FieldType::U32, "max-quantity", "Quantity");
-        self.setup_column(FieldType::String, "length-unit", "Unit");
+        self.setup_column(FieldType::Unit, "length-unit", "Unit");
         self.setup_column(FieldType::Fraction, "length", "Length");
+        self.setup_column(FieldType::Fraction, "sublength", "Sublength");
     }
 
     fn selection_model(&self) -> gtk::SelectionModel {
@@ -300,13 +321,6 @@ impl SuppliesPane {
             let supply_gobject = list_item.downcast_ref::<SupplyGObject>().unwrap();
 
             // Set entry fields based on column view values
-            // TODO: Manual match is bad
-            let length_unit = match supply_gobject.length_unit().as_str() {
-                "Inches" => 0,
-                "Centimeters" => 1,
-                "Meters" => 2,
-                _ => panic!(),
-            };
             let imp = self.imp();
             imp.name_field.set_text(&supply_gobject.name());
             imp.material_field.set_text(&supply_gobject.material());
@@ -314,8 +328,12 @@ impl SuppliesPane {
                 .set_text(&supply_gobject.price().to_string());
             imp.max_quantity_field
                 .set_value(supply_gobject.max_quantity() as f64);
-            imp.length_unit_field.set_selected(length_unit);
             imp.length_field.set_text(&supply_gobject.length());
+            imp.sublength_field.set_text(&supply_gobject.sublength());
+
+            // Do this after setting sublength_field to skip the field entry animation
+            imp.length_unit_field
+                .set_selected(supply_gobject.length_unit());
         }
     }
 
@@ -341,6 +359,25 @@ impl SuppliesPane {
         }
     }
 
+    fn use_sublength(&self) -> bool {
+        self.imp().length_unit_field.selected() == 0
+    }
+
+    fn update_length_unit(&self) {
+        let sublength_field = &self.imp().sublength_field;
+        if self.use_sublength() {
+            sublength_field.set_visible(true);
+        } else {
+            sublength_field.set_visible(false);
+            sublength_field.set_text("");
+        }
+        let selection = self.imp().length_unit_field.selected();
+        self.imp().length_field.set_title(match selection {
+            0 => "Feet",
+            _ => "Length",
+        });
+    }
+
     fn validate_fields(&self) {
         let mut all_valid = true;
 
@@ -357,6 +394,13 @@ impl SuppliesPane {
         let valid = Self::parse_length(&length_field.text()).is_ok();
         Self::highlight_field(length_field, valid);
         all_valid = all_valid && valid;
+
+        if self.use_sublength() {
+            let sublength_field = &self.imp().sublength_field;
+            let valid = Self::parse_length(&sublength_field.text()).is_ok();
+            Self::highlight_field(sublength_field, valid);
+            all_valid = all_valid && valid;
+        }
 
         // Disable update and add buttons if any field is invalid
         self.imp().update_button.set_sensitive(all_valid);

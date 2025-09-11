@@ -59,9 +59,10 @@
                     <property name="model">
                       <object class="GtkStringList">
                         <items>
+                          <item>Feet and inches</item>
                           <item>Inches</item>
-                          <item>Centimeters</item>
                           <item>Meters</item>
+                          <item>Centimeters</item>
                         </items>
                       </object>
                     </property>
@@ -69,7 +70,12 @@
                 </child>
                 <child>
                   <object class="AdwEntryRow" id="length_field">
-                    <property name="title">Length</property>
+                    <property name="title">Feet</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwEntryRow" id="sublength_field">
+                    <property name="title">Inches</property>
                   </object>
                 </child>
               </object>

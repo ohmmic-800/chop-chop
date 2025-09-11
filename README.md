@@ -44,10 +44,10 @@ cargo test -- --nocapture
     - [x] Don't allow saving changes if there is an invalid entry
 - [x] Show a graphic/instructions if there are no rows
 - [x] Parse fractions in length units
+- [x] Use a split field for ft+in
 - [ ] Adjust column widths
 - [ ] Improve column value formatting (currency symbol for price, combined length column)
 - [ ] Add unit conversions
-- [ ] Use a split field for ft+in
 - [ ] Add basic keyboard shortcuts (for three button actions)
 - [ ] Carry changes over to parts pane (avoiding repeated code)
 - [ ] Show a suggestion drop-down for materials (existing materials)
