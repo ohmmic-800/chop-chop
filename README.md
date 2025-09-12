@@ -30,6 +30,20 @@ cargo test -- --nocapture
 
 ## Todos
 
+### Itzel Suggestions
+
+- Limit text entry field lengths
+- Make zero quantity not mean unlimited
+- Bulk deletions and updates
+  - Toggle to enable bulk edit mode
+  - Multi-select in the column view
+  - Choose which field to update
+- No negative prices
+- No negative sizes
+- Find a way to make it more fun
+- Allow inches to be zero
+- Settings at the top-right
+
 ### Short-Term
 
 - [x] Split `window.rs` into multiple files (one per pane)
