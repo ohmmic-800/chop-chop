@@ -1,21 +1,23 @@
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::str::FromStr;
 
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use fraction::{Decimal, Fraction, Zero};
-use gtk::glib::{clone, subclass::InitializingObject};
+use gtk::glib::{Properties, clone, subclass::InitializingObject};
 use gtk::{gio::ListStore, glib};
 
 use super::entry::EntryObject;
 
 // TOOD: Optimize creation of new String object (as opposed to passing &str refs)
+// TODO: Review pub qualifiers (only use where they make sense)
 
 mod imp {
     use super::*;
 
     // Object holding the state
-    #[derive(gtk::CompositeTemplate, Default)]
+    #[derive(gtk::CompositeTemplate, Properties, Default)]
+    #[properties(wrapper_type = super::EntryPane)]
     #[template(resource = "/com/ohmm-software/Chop-Chop/entry_pane.ui")]
     pub struct EntryPane {
         // Entry fields
@@ -50,6 +52,14 @@ mod imp {
         #[template_child]
         pub column_view: TemplateChild<gtk::ColumnView>,
         pub entries: RefCell<Option<ListStore>>,
+
+        // Whether to enable the price field
+        #[property(get, set)]
+        pub allow_price: Cell<bool>,
+
+        // Whether to require a non-empty value for the quantity
+        #[property(get, set)]
+        pub require_quantity: Cell<bool>,
     }
 
     // The central trait for subclassing a GObject
@@ -71,6 +81,7 @@ mod imp {
     }
 
     // Trait shared by all GObjects
+    #[glib::derived_properties]
     impl ObjectImpl for EntryPane {
         // Called when the object is constructed
         fn constructed(&self) {
@@ -78,9 +89,10 @@ mod imp {
             self.obj().setup_column_view();
             self.obj().setup_callbacks();
             self.obj().update_content_stack();
-
-            // Otherwise higlighting is only applied after the first edit to a validated field
             self.obj().validate_fields();
+            self.obj()
+                .bind_property("allow-price", &self.price_field.get(), "visible")
+                .build();
         }
     }
 
@@ -114,19 +126,18 @@ impl EntryPane {
     }
 
     /// Panics if parse_length(text) returns an error
-    fn format_fraction(text: &str) -> String {
+    fn format_fraction(&self, text: &str) -> String {
         // TODO: Make format configurable (original format, fraction, mixed, or decimal)
-        // May require making this a method
         // https://docs.rs/fraction/latest/fraction/#format-convert-to-string
         if text.is_empty() {
             String::from("")
         } else {
-            format!("{:.10}", Self::parse_length(text).unwrap())
+            format!("{:.10}", self.parse_length(text).unwrap())
         }
     }
 
-    fn format_length(entry_object: &EntryObject) -> String {
-        let mut output = Self::format_fraction(&entry_object.length());
+    fn format_length(&self, entry_object: &EntryObject) -> String {
+        let mut output = self.format_fraction(&entry_object.length());
         output += match entry_object.length_unit() {
             0 => "ft",
             1 => "in",
@@ -135,13 +146,21 @@ impl EntryPane {
             _ => panic!(),
         };
         if entry_object.length_unit() == 0 {
-            output += &format!(" {}in", &Self::format_fraction(&entry_object.sublength()));
+            output += &format!(" {}in", &self.format_fraction(&entry_object.sublength()));
         }
         output
     }
 
-    fn format_price(entry_object: &EntryObject) -> String {
-        let price = Self::parse_price(&entry_object.price()).unwrap();
+    fn format_material(&self, entry_object: &EntryObject) -> String {
+        entry_object.material().to_string()
+    }
+
+    fn format_name(&self, entry_object: &EntryObject) -> String {
+        entry_object.name().to_string()
+    }
+
+    fn format_price(&self, entry_object: &EntryObject) -> String {
+        let price = self.parse_price(&entry_object.price()).unwrap();
         if price == Decimal::zero() {
             String::from("Free")
         } else {
@@ -149,8 +168,8 @@ impl EntryPane {
         }
     }
 
-    fn format_quantity(entry_object: &EntryObject) -> String {
-        let quantity = Self::parse_quantity(&entry_object.quantity()).unwrap();
+    fn format_quantity(&self, entry_object: &EntryObject) -> String {
+        let quantity = self.parse_quantity(&entry_object.quantity()).unwrap();
         if quantity == -1 {
             String::from("Unlimited")
         } else {
@@ -158,7 +177,7 @@ impl EntryPane {
         }
     }
 
-    fn highlight_field(field: &adw::EntryRow, is_valid: bool) {
+    fn highlight_field(&self, field: &adw::EntryRow, is_valid: bool) {
         if is_valid {
             field.remove_css_class("invalid-entry");
         } else {
@@ -178,7 +197,7 @@ impl EntryPane {
         )
     }
 
-    fn parse_length(text: &str) -> Result<Fraction, ()> {
+    fn parse_length(&self, text: &str) -> Result<Fraction, ()> {
         let tokens: Vec<_> = text.trim().split(" ").filter(|s| !s.is_empty()).collect();
         if tokens.is_empty() || (tokens.len() > 2) {
             Err(())
@@ -195,7 +214,7 @@ impl EntryPane {
     }
 
     /// Currently this allows specifying price via fraction string
-    fn parse_price(text: &str) -> Result<Decimal, ()> {
+    fn parse_price(&self, text: &str) -> Result<Decimal, ()> {
         let text = text.trim();
         if text.is_empty() {
             Ok(Decimal::zero())
@@ -207,11 +226,15 @@ impl EntryPane {
         }
     }
 
-    fn parse_quantity(text: &str) -> Result<i64, ()> {
+    fn parse_quantity(&self, text: &str) -> Result<i64, ()> {
         let text = text.trim();
         if text.is_empty() {
-            // No entry means unlimited quantity
-            Ok(-1)
+            if self.require_quantity() {
+                Err(())
+            } else {
+                // Unlimited
+                Ok(-1)
+            }
         } else {
             match text.parse::<i64>() {
                 Ok(value) if (value >= 0) => Ok(value),
@@ -284,9 +307,20 @@ impl EntryPane {
                 pane.update_content_stack();
             }
         ));
+        self.connect_require_quantity_notify(clone!(
+            #[weak(rename_to = pane)]
+            self,
+            move |_| {
+                pane.validate_fields();
+            }
+        ));
     }
 
-    fn setup_column(&self, format_column_fn: fn(&EntryObject) -> String, column_title: &str) {
+    fn setup_column(
+        &self,
+        format_column_fn: fn(&Self, &EntryObject) -> String,
+        column_title: &str,
+    ) -> gtk::ColumnViewColumn {
         let factory = gtk::SignalListItemFactory::new();
 
         // Called when a new row of widgets is added
@@ -297,21 +331,25 @@ impl EntryPane {
         });
 
         // Called when an object in the model is bound to a row
-        factory.connect_bind(move |_, list_item| {
-            let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let entry_object = list_item.item().and_downcast::<EntryObject>().unwrap();
-            let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            label.set_label(&format_column_fn(&entry_object));
-        });
+        factory.connect_bind(clone!(
+            #[weak(rename_to = pane)]
+            self,
+            move |_, list_item| {
+                let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
+                let entry_object = list_item.item().and_downcast::<EntryObject>().unwrap();
+                let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
+                label.set_label(&format_column_fn(&pane, &entry_object));
+            }
+        ));
 
         // Create a column and add it to the view
-        self.imp().column_view.append_column(
-            &gtk::ColumnViewColumn::builder()
-                .title(column_title)
-                .expand(true)
-                .factory(&factory)
-                .build(),
-        );
+        let column = gtk::ColumnViewColumn::builder()
+            .title(column_title)
+            .expand(true)
+            .factory(&factory)
+            .build();
+        self.imp().column_view.append_column(&column);
+        column
     }
 
     fn setup_column_view(&self) {
@@ -324,11 +362,15 @@ impl EntryPane {
         self.imp().column_view.set_model(Some(&selection));
 
         // Add columns to the view and create factories for each
-        self.setup_column(EntryObject::name, "Name");
-        self.setup_column(EntryObject::material, "Material");
-        self.setup_column(Self::format_price, "Price");
+        self.setup_column(Self::format_name, "Name");
+        self.setup_column(Self::format_material, "Material");
+        let price_column = self.setup_column(Self::format_price, "Price");
         self.setup_column(Self::format_quantity, "Quantity");
         self.setup_column(Self::format_length, "Length");
+
+        // Visibility of the price column is determined by the allow-price property
+        self.bind_property("allow-price", &price_column, "visible")
+            .build();
     }
 
     fn entries(&self) -> ListStore {
@@ -401,28 +443,28 @@ impl EntryPane {
         let mut all_valid = true;
 
         let valid = self.imp().material_field.text_length() != 0;
-        Self::highlight_field(&self.imp().material_field, valid);
+        self.highlight_field(&self.imp().material_field, valid);
         all_valid = all_valid && valid;
 
         let price_field = &self.imp().price_field;
-        let valid = Self::parse_price(&price_field.text()).is_ok();
-        Self::highlight_field(price_field, valid);
+        let valid = self.parse_price(&price_field.text()).is_ok();
+        self.highlight_field(price_field, valid);
         all_valid = all_valid && valid;
 
         let quantity_field = &self.imp().quantity_field;
-        let valid = Self::parse_quantity(&quantity_field.text()).is_ok();
-        Self::highlight_field(quantity_field, valid);
+        let valid = self.parse_quantity(&quantity_field.text()).is_ok();
+        self.highlight_field(quantity_field, valid);
         all_valid = all_valid && valid;
 
         let length_field = &self.imp().length_field;
-        let valid = Self::parse_length(&length_field.text()).is_ok();
-        Self::highlight_field(length_field, valid);
+        let valid = self.parse_length(&length_field.text()).is_ok();
+        self.highlight_field(length_field, valid);
         all_valid = all_valid && valid;
 
         if self.use_sublength() {
             let sublength_field = &self.imp().sublength_field;
-            let valid = Self::parse_length(&sublength_field.text()).is_ok();
-            Self::highlight_field(sublength_field, valid);
+            let valid = self.parse_length(&sublength_field.text()).is_ok();
+            self.highlight_field(sublength_field, valid);
             all_valid = all_valid && valid;
         }
 

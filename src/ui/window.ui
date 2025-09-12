@@ -52,7 +52,10 @@
                 <property name="title">Supplies</property>
                 <property name="icon-name">build-symbolic</property>
                 <property name="child">
-                  <object class="ChopChopEntryPane" id="supplies_pane"></object>
+                  <object class="ChopChopEntryPane" id="supplies_pane">
+                    <property name="allow-price">true</property>
+                    <property name="require-quantity">false</property>
+                  </object>
                 </property>
               </object>
             </child>
@@ -62,7 +65,10 @@
                 <property name="title">Parts</property>
                 <property name="icon-name">build-alt-symbolic</property>
                 <property name="child">
-                  <object class="ChopChopEntryPane" id="parts_pane"></object>
+                  <object class="ChopChopEntryPane" id="parts_pane">
+                    <property name="allow-price">false</property>
+                    <property name="require-quantity">true</property>
+                  </object>
                 </property>
               </object>
             </child>
