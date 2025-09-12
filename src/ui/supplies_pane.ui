@@ -23,22 +23,26 @@
                 <child>
                   <object class="AdwEntryRow" id="name_field">
                     <property name="title">Name</property>
+                    <property name="max-length">64</property>
                   </object>
                 </child>
                 <child>
                   <object class="AdwEntryRow" id="material_field">
                     <property name="title">Material</property>
                     <property name="text">Default</property>
+                    <property name="max-length">64</property>
                   </object>
                 </child>
                 <child>
                   <object class="AdwEntryRow" id="price_field">
                     <property name="title">Price</property>
+                    <property name="max-length">16</property>
                   </object>
                 </child>
                 <child>
                   <object class="AdwEntryRow" id="quantity_field">
                     <property name="title">Quantity</property>
+                    <property name="max-length">16</property>
                   </object>
                 </child>
               </object>
@@ -63,11 +67,13 @@
                 <child>
                   <object class="AdwEntryRow" id="length_field">
                     <property name="title">Feet</property>
+                    <property name="max-length">16</property>
                   </object>
                 </child>
                 <child>
                   <object class="AdwEntryRow" id="sublength_field">
                     <property name="title">Inches</property>
+                    <property name="max-length">16</property>
                   </object>
                 </child>
               </object>

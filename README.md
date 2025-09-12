@@ -32,16 +32,7 @@ cargo test -- --nocapture
 
 ### Itzel Suggestions
 
-- Limit text entry field lengths
-- Make zero quantity not mean unlimited
-- Bulk deletions and updates
-  - Toggle to enable bulk edit mode
-  - Multi-select in the column view
-  - Choose which field to update
-- No negative prices
-- No negative sizes
-- Find a way to make it more fun
-- Allow inches to be zero
+
 - Settings at the top-right
 
 ### Short-Term
@@ -83,3 +74,8 @@ cargo test -- --nocapture
 - [ ] Use a "jump" overlay (outline) in the report view
 - [ ] Add cut/blade width as a solver option
 - [ ] Allow choice to minimize waste or cost
+- [ ] Bulk deletions and updates
+    - [ ] Toggle to enable bulk edit mode
+    - [ ] Multi-select in the column view
+    - [ ] Choose which field to update
+- [ ] Find a way to make it more fun

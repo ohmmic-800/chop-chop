@@ -153,7 +153,7 @@ impl SuppliesPane {
 
     fn format_quantity(supply_gobject: &SupplyGObject) -> String {
         let quantity = Self::parse_quantity(&supply_gobject.quantity()).unwrap();
-        if quantity == 0 {
+        if quantity == -1 {
             String::from("Unlimited")
         } else {
             quantity.to_string()
@@ -180,41 +180,45 @@ impl SuppliesPane {
         )
     }
 
-    /// Allows for an arbitrary number of fraction terms (not limited to <= 2)
     fn parse_length(text: &str) -> Result<Fraction, ()> {
-        let text = text.trim();
-        if text.is_empty() {
-            return Err(());
-        }
-        let mut length = Fraction::zero();
-        for token in text.split(" ") {
-            length += match Fraction::from_str(token) {
-                Ok(value) => value,
-                Err(_) => return Err(()),
-            };
-        }
-        Ok(length)
-    }
-
-    fn parse_quantity(text: &str) -> Result<u32, ()> {
-        let text = text.trim();
-        if text.is_empty() {
-            return Ok(0);
-        }
-        match text.parse::<u32>() {
-            Ok(value) => Ok(value),
-            Err(_) => Err(()),
+        let tokens: Vec<_> = text.trim().split(" ").filter(|s| !s.is_empty()).collect();
+        if tokens.is_empty() || (tokens.len() > 2) {
+            Err(())
+        } else {
+            let mut length = Fraction::zero();
+            for token in tokens {
+                length += match Fraction::from_str(token) {
+                    Ok(value) if (value >= Fraction::zero()) => value,
+                    _ => return Err(()),
+                };
+            }
+            Ok(length)
         }
     }
 
+    /// Currently this allows specifying price via fraction string
     fn parse_price(text: &str) -> Result<Decimal, ()> {
         let text = text.trim();
         if text.is_empty() {
-            return Ok(Decimal::zero());
+            Ok(Decimal::zero())
+        } else {
+            match Decimal::from_str(text) {
+                Ok(value) if (value >= Decimal::zero()) => Ok(value),
+                _ => Err(()),
+            }
         }
-        match Decimal::from_str(text) {
-            Ok(value) => Ok(value),
-            Err(_) => Err(()),
+    }
+
+    fn parse_quantity(text: &str) -> Result<i64, ()> {
+        let text = text.trim();
+        if text.is_empty() {
+            // No entry means unlimited quantity
+            Ok(-1)
+        } else {
+            match text.parse::<i64>() {
+                Ok(value) if (value >= 0) => Ok(value),
+                _ => Err(()),
+            }
         }
     }
 
