@@ -7,7 +7,7 @@ use fraction::{Decimal, Fraction, Zero};
 use gtk::glib::{clone, subclass::InitializingObject};
 use gtk::{gio::ListStore, glib};
 
-use super::supply::SupplyGObject;
+use super::entry::EntryObject;
 
 // TOOD: Optimize creation of new String object (as opposed to passing &str refs)
 
@@ -16,8 +16,8 @@ mod imp {
 
     // Object holding the state
     #[derive(gtk::CompositeTemplate, Default)]
-    #[template(resource = "/com/ohmm-software/Chop-Chop/supplies_pane.ui")]
-    pub struct SuppliesPane {
+    #[template(resource = "/com/ohmm-software/Chop-Chop/entry_pane.ui")]
+    pub struct EntryPane {
         // Entry fields
         #[template_child]
         pub name_field: TemplateChild<adw::EntryRow>,
@@ -46,19 +46,17 @@ mod imp {
         #[template_child]
         pub content_stack: TemplateChild<gtk::Stack>,
 
-        // Column view
+        // Column view and associated model
         #[template_child]
-        pub supplies_view: TemplateChild<gtk::ColumnView>,
-
-        // Model (data store)
-        pub supplies: RefCell<Option<ListStore>>,
+        pub column_view: TemplateChild<gtk::ColumnView>,
+        pub entries: RefCell<Option<ListStore>>,
     }
 
     // The central trait for subclassing a GObject
     #[glib::object_subclass]
-    impl ObjectSubclass for SuppliesPane {
-        const NAME: &'static str = "ChopChopSuppliesPane";
-        type Type = super::SuppliesPane;
+    impl ObjectSubclass for EntryPane {
+        const NAME: &'static str = "ChopChopEntryPane";
+        type Type = super::EntryPane;
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
@@ -73,7 +71,7 @@ mod imp {
     }
 
     // Trait shared by all GObjects
-    impl ObjectImpl for SuppliesPane {
+    impl ObjectImpl for EntryPane {
         // Called when the object is constructed
         fn constructed(&self) {
             self.parent_constructed();
@@ -87,31 +85,31 @@ mod imp {
     }
 
     // Trait shared by all widgets
-    impl WidgetImpl for SuppliesPane {}
+    impl WidgetImpl for EntryPane {}
 
     // Trait shared by GTK boxes
-    impl BoxImpl for SuppliesPane {}
+    impl BoxImpl for EntryPane {}
 }
 
 glib::wrapper! {
-    pub struct SuppliesPane(ObjectSubclass<imp::SuppliesPane>)
+    pub struct EntryPane(ObjectSubclass<imp::EntryPane>)
         @extends gtk::Box, gtk::Widget,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Orientable;
 }
 
-impl SuppliesPane {
-    fn add_supply(&self) {
-        self.supplies().append(&self.parse_all_fields());
+impl EntryPane {
+    fn add_entry(&self) {
+        self.entries().append(&self.parse_all_fields());
 
         // Select the item we just added
         let selection_model = self.selection_model();
         selection_model.select_item(selection_model.n_items() - 1, true);
     }
 
-    fn delete_supply(&self) {
+    fn delete_entry(&self) {
         let selection = self.selection_model().selection();
         if !selection.is_empty() {
-            self.supplies().remove(selection.minimum());
+            self.entries().remove(selection.minimum());
         }
     }
 
@@ -127,23 +125,23 @@ impl SuppliesPane {
         }
     }
 
-    fn format_length(supply_gobject: &SupplyGObject) -> String {
-        let mut output = Self::format_fraction(&supply_gobject.length());
-        output += match supply_gobject.length_unit() {
+    fn format_length(entry_object: &EntryObject) -> String {
+        let mut output = Self::format_fraction(&entry_object.length());
+        output += match entry_object.length_unit() {
             0 => "ft",
             1 => "in",
             2 => "m",
             3 => "cm",
             _ => panic!(),
         };
-        if supply_gobject.length_unit() == 0 {
-            output += &format!(" {}in", &Self::format_fraction(&supply_gobject.sublength()));
+        if entry_object.length_unit() == 0 {
+            output += &format!(" {}in", &Self::format_fraction(&entry_object.sublength()));
         }
         output
     }
 
-    fn format_price(supply_gobject: &SupplyGObject) -> String {
-        let price = Self::parse_price(&supply_gobject.price()).unwrap();
+    fn format_price(entry_object: &EntryObject) -> String {
+        let price = Self::parse_price(&entry_object.price()).unwrap();
         if price == Decimal::zero() {
             String::from("Free")
         } else {
@@ -151,8 +149,8 @@ impl SuppliesPane {
         }
     }
 
-    fn format_quantity(supply_gobject: &SupplyGObject) -> String {
-        let quantity = Self::parse_quantity(&supply_gobject.quantity()).unwrap();
+    fn format_quantity(entry_object: &EntryObject) -> String {
+        let quantity = Self::parse_quantity(&entry_object.quantity()).unwrap();
         if quantity == -1 {
             String::from("Unlimited")
         } else {
@@ -168,8 +166,8 @@ impl SuppliesPane {
         }
     }
 
-    fn parse_all_fields(&self) -> SupplyGObject {
-        SupplyGObject::new(
+    fn parse_all_fields(&self) -> EntryObject {
+        EntryObject::new(
             self.imp().name_field.text().to_string(),
             self.imp().material_field.text().to_string(),
             self.imp().price_field.text().to_string(),
@@ -223,7 +221,7 @@ impl SuppliesPane {
     }
 
     fn selection_model(&self) -> gtk::SelectionModel {
-        self.imp().supplies_view.model().unwrap()
+        self.imp().column_view.model().unwrap()
     }
 
     fn setup_callbacks(&self) {
@@ -254,21 +252,21 @@ impl SuppliesPane {
             #[weak(rename_to = pane)]
             self,
             move |_| {
-                pane.update_supply();
+                pane.update_entry();
             }
         ));
         self.imp().add_button.connect_clicked(clone!(
             #[weak(rename_to = pane)]
             self,
             move |_| {
-                pane.add_supply();
+                pane.add_entry();
             }
         ));
         self.imp().delete_button.connect_clicked(clone!(
             #[weak(rename_to = pane)]
             self,
             move |_| {
-                pane.delete_supply();
+                pane.delete_entry();
                 pane.update_fields();
             }
         ));
@@ -279,7 +277,7 @@ impl SuppliesPane {
                 pane.update_fields();
             }
         ));
-        self.supplies().connect_items_changed(clone!(
+        self.entries().connect_items_changed(clone!(
             #[weak(rename_to = pane)]
             self,
             move |_, _, _, _| {
@@ -288,7 +286,7 @@ impl SuppliesPane {
         ));
     }
 
-    fn setup_column(&self, format_column_fn: fn(&SupplyGObject) -> String, column_title: &str) {
+    fn setup_column(&self, format_column_fn: fn(&EntryObject) -> String, column_title: &str) {
         let factory = gtk::SignalListItemFactory::new();
 
         // Called when a new row of widgets is added
@@ -301,13 +299,13 @@ impl SuppliesPane {
         // Called when an object in the model is bound to a row
         factory.connect_bind(move |_, list_item| {
             let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
-            let supply_gobject = list_item.item().and_downcast::<SupplyGObject>().unwrap();
+            let entry_object = list_item.item().and_downcast::<EntryObject>().unwrap();
             let label = list_item.child().and_downcast::<gtk::Label>().unwrap();
-            label.set_label(&format_column_fn(&supply_gobject));
+            label.set_label(&format_column_fn(&entry_object));
         });
 
         // Create a column and add it to the view
-        self.imp().supplies_view.append_column(
+        self.imp().column_view.append_column(
             &gtk::ColumnViewColumn::builder()
                 .title(column_title)
                 .expand(true)
@@ -318,28 +316,28 @@ impl SuppliesPane {
 
     fn setup_column_view(&self) {
         // Create the list store (swap into the RefCell)
-        let model = Some(ListStore::new::<SupplyGObject>());
-        self.imp().supplies.replace(model);
+        let model = Some(ListStore::new::<EntryObject>());
+        self.imp().entries.replace(model);
 
         // Link the model to the column view
-        let selection = gtk::SingleSelection::new(Some(self.supplies()));
-        self.imp().supplies_view.set_model(Some(&selection));
+        let selection = gtk::SingleSelection::new(Some(self.entries()));
+        self.imp().column_view.set_model(Some(&selection));
 
         // Add columns to the view and create factories for each
-        self.setup_column(SupplyGObject::name, "Name");
-        self.setup_column(SupplyGObject::material, "Material");
+        self.setup_column(EntryObject::name, "Name");
+        self.setup_column(EntryObject::material, "Material");
         self.setup_column(Self::format_price, "Price");
         self.setup_column(Self::format_quantity, "Quantity");
         self.setup_column(Self::format_length, "Length");
     }
 
-    fn supplies(&self) -> ListStore {
-        self.imp().supplies.borrow().clone().unwrap()
+    fn entries(&self) -> ListStore {
+        self.imp().entries.borrow().clone().unwrap()
     }
 
     fn update_content_stack(&self) {
         let content_stack = &self.imp().content_stack;
-        if self.supplies().n_items() == 0 {
+        if self.entries().n_items() == 0 {
             content_stack.set_visible_child_name("placeholder");
         } else {
             content_stack.set_visible_child_name("nonempty");
@@ -349,21 +347,21 @@ impl SuppliesPane {
     fn update_fields(&self) {
         let selection = self.selection_model().selection();
         if !selection.is_empty() {
-            let list_item = self.supplies().item(selection.minimum()).unwrap();
-            let supply_gobject = list_item.downcast_ref::<SupplyGObject>().unwrap();
+            let list_item = self.entries().item(selection.minimum()).unwrap();
+            let entry_object = list_item.downcast_ref::<EntryObject>().unwrap();
 
             // Set entry fields based on column view values
             let imp = self.imp();
-            imp.name_field.set_text(&supply_gobject.name());
-            imp.material_field.set_text(&supply_gobject.material());
-            imp.price_field.set_text(&supply_gobject.price());
-            imp.quantity_field.set_text(&supply_gobject.quantity());
-            imp.length_field.set_text(&supply_gobject.length());
-            imp.sublength_field.set_text(&supply_gobject.sublength());
+            imp.name_field.set_text(&entry_object.name());
+            imp.material_field.set_text(&entry_object.material());
+            imp.price_field.set_text(&entry_object.price());
+            imp.quantity_field.set_text(&entry_object.quantity());
+            imp.length_field.set_text(&entry_object.length());
+            imp.sublength_field.set_text(&entry_object.sublength());
 
             // Do this after setting sublength_field to skip the field entry animation
             imp.length_unit_field
-                .set_selected(supply_gobject.length_unit());
+                .set_selected(entry_object.length_unit());
         }
     }
 
@@ -382,13 +380,13 @@ impl SuppliesPane {
         });
     }
 
-    fn update_supply(&self) {
+    fn update_entry(&self) {
         let selection_model = self.selection_model();
         let selection = selection_model.selection();
         if !selection.is_empty() {
             let i = selection.minimum();
-            self.supplies().remove(i);
-            self.supplies().insert(i, &self.parse_all_fields());
+            self.entries().remove(i);
+            self.entries().insert(i, &self.parse_all_fields());
 
             // Select the item we just modified
             selection_model.select_item(i, true);

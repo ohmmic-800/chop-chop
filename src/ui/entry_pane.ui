@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk" version="4.10" />
   <requires lib="libadwaita" version="1.4" />
-  <template class="ChopChopSuppliesPane" parent="GtkBox">
+  <template class="ChopChopEntryPane" parent="GtkBox">
     <child>
       <object class="AdwOverlaySplitView">
         <property name="hexpand">true</property>
@@ -110,7 +110,7 @@
                   <object class="GtkScrolledWindow">
                     <property name="width_request">350</property>
                     <child>
-                      <object class="GtkColumnView" id="supplies_view"></object>
+                      <object class="GtkColumnView" id="column_view"></object>
                     </child>
                   </object>
                 </property>
@@ -122,8 +122,8 @@
                 <property name="child">
                   <object class="AdwStatusPage">
                     <property name="icon-name">build-symbolic</property>
-                    <property name="title">No Supplies Defined</property>
-                    <property name="description">Add supplies using the sidebar.</property>
+                    <property name="title">Nothing Added</property>
+                    <property name="description">Add entries using the sidebar.</property>
                   </object>
                 </property>
               </object>

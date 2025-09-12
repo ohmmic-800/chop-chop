@@ -2,9 +2,8 @@ use adw::subclass::prelude::*;
 use gtk::glib::{Object, subclass::InitializingObject};
 use gtk::{CompositeTemplate, gio, glib};
 
-use super::parts_pane::PartsPane;
+use super::entry_pane::EntryPane;
 use super::solver_pane::SolverPane;
-use super::supplies_pane::SuppliesPane;
 
 mod imp {
     use super::*;
@@ -14,9 +13,9 @@ mod imp {
     #[template(resource = "/com/ohmm-software/Chop-Chop/window.ui")]
     pub struct Window {
         #[template_child]
-        pub supplies_pane: TemplateChild<SuppliesPane>,
+        pub supplies_pane: TemplateChild<EntryPane>,
         #[template_child]
-        pub parts_pane: TemplateChild<PartsPane>,
+        pub parts_pane: TemplateChild<EntryPane>,
         #[template_child]
         pub solver_pane: TemplateChild<SolverPane>,
     }

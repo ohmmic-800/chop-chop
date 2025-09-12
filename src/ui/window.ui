@@ -52,7 +52,7 @@
                 <property name="title">Supplies</property>
                 <property name="icon-name">build-symbolic</property>
                 <property name="child">
-                  <object class="ChopChopSuppliesPane" id="supplies_pane"></object>
+                  <object class="ChopChopEntryPane" id="supplies_pane"></object>
                 </property>
               </object>
             </child>
@@ -62,7 +62,7 @@
                 <property name="title">Parts</property>
                 <property name="icon-name">build-alt-symbolic</property>
                 <property name="child">
-                  <object class="ChopChopPartsPane" id="parts_pane"></object>
+                  <object class="ChopChopEntryPane" id="parts_pane"></object>
                 </property>
               </object>
             </child>

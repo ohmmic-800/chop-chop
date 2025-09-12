@@ -6,13 +6,11 @@ use std::cell::RefCell;
 
 /// Represents the user-entered data for a supply row
 ///
-/// Units need to be normalized before converting to crate::modeling::Supply
-///
 /// Stores user-entered strings instead of parsed numeric types (fraction::Decimal or
 /// fraction::Fraction). This allows editing the original text when a row is re-selected, and avoids
 /// headaches with storing custom types in a GObject.
 #[derive(Default)]
-pub struct SupplyData {
+pub struct EntryData {
     pub name: String,
     pub material: String,
     pub price: String,
@@ -29,8 +27,8 @@ mod imp {
 
     // Object holding the state
     #[derive(Properties, Default)]
-    #[properties(wrapper_type = super::SupplyGObject)]
-    pub struct SupplyGObject {
+    #[properties(wrapper_type = super::EntryObject)]
+    pub struct EntryObject {
         #[property(name = "name", get, set, type = String, member = name)]
         #[property(name = "material", get, set, type = String, member = material)]
         #[property(name = "price", get, set, type = String, member = price)]
@@ -38,26 +36,26 @@ mod imp {
         #[property(name = "length-unit", get, set, type = u32, member = length_unit)]
         #[property(name = "length", get, set, type = String, member = length)]
         #[property(name = "sublength", get, set, type = String, member = sublength)]
-        pub data: RefCell<SupplyData>,
+        pub data: RefCell<EntryData>,
     }
 
     // The central trait for subclassing a GObject
     #[glib::object_subclass]
-    impl ObjectSubclass for SupplyGObject {
-        const NAME: &'static str = "ChopChopSupplyGObject";
-        type Type = super::SupplyGObject;
+    impl ObjectSubclass for EntryObject {
+        const NAME: &'static str = "ChopChopEntryObject";
+        type Type = super::EntryObject;
     }
 
     // Trait shared by all GObjects
     #[glib::derived_properties]
-    impl ObjectImpl for SupplyGObject {}
+    impl ObjectImpl for EntryObject {}
 }
 
 glib::wrapper! {
-    pub struct SupplyGObject(ObjectSubclass<imp::SupplyGObject>);
+    pub struct EntryObject(ObjectSubclass<imp::EntryObject>);
 }
 
-impl SupplyGObject {
+impl EntryObject {
     pub fn new(
         name: String,
         material: String,

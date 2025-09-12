@@ -53,9 +53,9 @@ cargo test -- --nocapture
 - [x] Improve column value formatting (currency symbol for price, combined length column)
 - [x] Adjust column widths
 - [x] Improve window scaling behavior
+- [ ] Carry changes over to parts pane (avoiding repeated code)
 - [ ] Show a suggestion drop-down for materials (existing materials)
 - [ ] Add basic keyboard shortcuts (for three button actions)
-- [ ] Carry changes over to parts pane (avoiding repeated code)
 - [ ] Add unit conversions
 - [ ] Show a graphic/instructions if there are no solver results
 
