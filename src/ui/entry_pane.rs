@@ -48,10 +48,9 @@ mod imp {
         #[template_child]
         pub content_stack: TemplateChild<gtk::Stack>,
 
-        // Column view and associated model
+        // Column view
         #[template_child]
         pub column_view: TemplateChild<gtk::ColumnView>,
-        pub entries: RefCell<Option<ListStore>>,
 
         // Whether to enable the price field
         #[property(get, set)]
@@ -60,6 +59,9 @@ mod imp {
         // Whether to require a non-empty value for the quantity
         #[property(get, set)]
         pub require_quantity: Cell<bool>,
+
+        // Data model
+        pub entries: RefCell<Option<ListStore>>,
     }
 
     // The central trait for subclassing a GObject

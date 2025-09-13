@@ -1,12 +1,20 @@
 use fraction::{Decimal, Zero};
 
+use async_channel::Sender;
+
 use crate::modeling::{CutList, Part, Supply};
 use crate::solvers::{Solution, Solver};
 
 pub struct NaiveSolver {}
 
 impl Solver for NaiveSolver {
-    fn solve(&self, supplies: &Vec<Supply>, parts: &Vec<Part>) -> Result<Solution, String> {
+    fn solve(
+        &self,
+        supplies: &Vec<Supply>,
+        parts: &Vec<Part>,
+        progress_sender: Option<Sender<f64>>,
+        result_sender: Option<Sender<Result<Solution, String>>>,
+    ) -> Result<Solution, String> {
         let mut cut_lists = Vec::<CutList>::new();
         let mut supply_consumption = Vec::<i64>::new();
         let mut total_price = Decimal::zero();
@@ -46,7 +54,10 @@ impl Solver for NaiveSolver {
                     }
                     if best_price == Decimal::infinity() {
                         // May be triggered even if valid solutions exist
-                        return Err(String::from("No materials available with sufficient size"));
+                        let result =
+                            Err(String::from("No materials available with sufficient size"));
+                        Self::send_final_result(result.clone(), progress_sender, result_sender);
+                        return result;
                     } else {
                         // TODO: Is .clone() the right way to do this?
                         cut_lists.push(CutList {
@@ -61,11 +72,13 @@ impl Solver for NaiveSolver {
                 }
             }
         }
-        Ok(Solution {
+        let solution = Ok(Solution {
             cut_lists,
             supply_consumption,
             total_price,
-        })
+        });
+        Self::send_final_result(solution.clone(), progress_sender, result_sender);
+        solution
     }
 }
 
@@ -106,6 +119,8 @@ mod tests {
             .solve(
                 &vec![on_hand_supply, purchaseable_supply],
                 &vec![part_1, part_2],
+                None,
+                None,
             )
             .unwrap();
         assert_eq!(solution.supply_consumption, vec![1, 1]);

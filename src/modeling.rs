@@ -30,7 +30,7 @@ pub struct Part {
 /// Represents a set of of cuts to perform on an object
 ///
 /// Assumed 1D for now
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CutList {
     pub material: String,
 

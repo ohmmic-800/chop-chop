@@ -1,12 +1,11 @@
-use std::thread;
-use std::time::Duration;
+use std::cell::RefCell;
 
 use adw::prelude::*;
 use adw::subclass::prelude::*;
-use gtk::glib::{clone, subclass::InitializingObject};
-use gtk::{CompositeTemplate, PrintOperation, gio, glib};
+use gtk::glib::subclass::InitializingObject;
+use gtk::{CompositeTemplate, PrintOperation, glib};
 
-use super::solver_overlay::SolverOverlay;
+use crate::solvers::Solution;
 
 mod imp {
     use super::*;
@@ -28,6 +27,9 @@ mod imp {
         // Solution view
         #[template_child]
         pub drawing_area: TemplateChild<gtk::DrawingArea>,
+
+        // Solver result
+        pub result: RefCell<Option<Result<Solution, String>>>,
     }
 
     // The central trait for subclassing a GObject
@@ -73,19 +75,11 @@ glib::wrapper! {
 
 // TODO: Copy code from supplies pane after optimizing/refining
 impl SolverPane {
-    fn run_solver(&self) {}
+    pub fn update_result(&self, result: Result<Solution, String>) {
+        self.imp().result.replace(Some(result));
+    }
 
     fn setup_callbacks(&self) {
-        // Set up callback for clicking the run button
-        // TODO: Lock UI *immediately* after pressing (currently possible to double-click)
-        self.imp().run_button.connect_clicked(clone!(
-            #[weak(rename_to = window)]
-            self,
-            move |_| {
-                window.run_solver();
-            }
-        ));
-
         // TODO: Ensure output looks the same when printed
         // Has something to do with resolution (display units)
 

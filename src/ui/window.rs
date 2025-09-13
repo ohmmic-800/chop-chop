@@ -1,6 +1,3 @@
-use std::thread;
-use std::time::Duration;
-
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use fraction::Fraction;
@@ -86,6 +83,7 @@ impl Window {
     }
 
     fn setup_callbacks(&self) {
+        // TODO: Lock UI *immediately* after pressing (currently possible to double-click)
         self.imp()
             .solver_pane
             .imp()
@@ -144,35 +142,37 @@ impl Window {
         overlay.set_can_close(false);
         overlay.present(Some(self));
 
-        let (sender, receiver) = async_channel::bounded(1);
+        let (progress_sender, progress_receiver) = async_channel::bounded(1);
+        let (result_sender, result_receiver) = async_channel::bounded(1);
 
         // TODO: Replace this with the actual solver logic
         // TODO: Pass solvers a progress callback
         gio::spawn_blocking(move || {
             // TODO: Select correct solver
             let solver = NaiveSolver {};
-            let solution = solver.solve(&supplies, &parts).unwrap();
+            let _ = solver.solve(
+                &supplies,
+                &parts,
+                Some(progress_sender),
+                Some(result_sender),
+            );
             println!("Solving done!");
-            dbg!(solution);
-            let t = 5;
-            for i in 0..t {
-                let progress = (i as f64) / (t as f64);
-                sender.send_blocking(progress).expect("Channel closed");
-                thread::sleep(Duration::from_secs(1));
-            }
-            sender.send_blocking(1.0).expect("Channel closed");
         });
 
         glib::spawn_future_local(clone!(
             #[weak]
             overlay,
+            #[weak(rename_to = window)]
+            self,
             async move {
-                while let Ok(progress) = receiver.recv().await {
+                while let Ok(progress) = progress_receiver.recv().await {
                     overlay.update_progress(progress);
                     if progress == 1.0 {
                         overlay.force_close();
                     }
                 }
+                let result = result_receiver.recv().await.expect("Channel closed");
+                window.imp().solver_pane.update_result(result);
             }
         ));
     }
