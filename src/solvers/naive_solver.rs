@@ -1,13 +1,15 @@
+use fraction::{Decimal, Zero};
+
 use crate::modeling::{CutList, Part, Supply};
 use crate::solvers::{Solution, Solver};
 
 pub struct NaiveSolver {}
 
 impl Solver for NaiveSolver {
-    fn solve(&self, supplies: &[&Supply], parts: &[&Part]) -> Result<Solution, String> {
+    fn solve(&self, supplies: &Vec<Supply>, parts: &Vec<Part>) -> Result<Solution, String> {
         let mut cut_lists = Vec::<CutList>::new();
-        let mut supply_consumption = Vec::<u32>::new();
-        let mut total_price = 0.0;
+        let mut supply_consumption = Vec::<i64>::new();
+        let mut total_price = Decimal::zero();
         let mut partial_lengths = Vec::new();
         for _ in supplies {
             supply_consumption.push(0);
@@ -30,19 +32,19 @@ impl Solver for NaiveSolver {
                 // Then pull from the cheapest supply with large-enough items
                 if !done {
                     let mut best_supply = 0;
-                    let mut best_price = -1.0;
+                    let mut best_price = Decimal::infinity();
                     for (i, supply) in supplies.iter().enumerate() {
                         if (part.length <= supply.length)
                             && (part.material == supply.material)
                             && ((supply_consumption[i] < supply.max_quantity)
                                 || (supply.max_quantity == 0))
-                            && ((best_price < 0.0) || (supply.price < best_price))
+                            && (supply.price < best_price)
                         {
                             best_supply = i;
                             best_price = supply.price;
                         }
                     }
-                    if best_price < 0.0 {
+                    if best_price == Decimal::infinity() {
                         // May be triggered even if valid solutions exist
                         return Err(String::from("No materials available with sufficient size"));
                     } else {
@@ -72,39 +74,41 @@ impl Solver for NaiveSolver {
 mod tests {
     use super::*;
 
+    use fraction::Fraction;
+
     #[test]
     fn test_naive_solver() {
         // TODO: Is .clone() the right way to do this?
         let material = String::from("Pine 2x4");
         let on_hand_supply = Supply {
             material: material.clone(),
-            length: 8.0,
-            price: 0.0,
+            length: Fraction::from(8.0),
+            price: Decimal::zero(),
             max_quantity: 1,
         };
         let purchaseable_supply = Supply {
             material: material.clone(),
-            length: 8.0,
-            price: 3.50,
+            length: Fraction::from(8.0),
+            price: Decimal::from(3.5),
             max_quantity: 0,
         };
         let part_1 = Part {
             material: material.clone(),
-            length: 3.0,
+            length: Fraction::from(3.0),
             quantity: 3,
         };
         let part_2 = Part {
             material,
-            length: 1.5,
+            length: Fraction::from(1.5),
             quantity: 1,
         };
         let solution = NaiveSolver {}
             .solve(
-                &[&on_hand_supply, &purchaseable_supply],
-                &[&part_1, &part_2],
+                &vec![on_hand_supply, purchaseable_supply],
+                &vec![part_1, part_2],
             )
             .unwrap();
         assert_eq!(solution.supply_consumption, vec![1, 1]);
-        assert_eq!(solution.total_price, 3.5);
+        assert_eq!(solution.total_price, Decimal::from(3.5));
     }
 }

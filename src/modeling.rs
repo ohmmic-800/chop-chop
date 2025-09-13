@@ -1,3 +1,5 @@
+use fraction::{Decimal, Fraction};
+
 /// Represents an available supply of a material
 ///
 /// Examples:
@@ -6,13 +8,13 @@
 #[derive(Debug)]
 pub struct Supply {
     pub material: String,
-    pub length: f64,
+    pub length: Fraction,
 
     /// Zero indicates that the material is on-hand (free)
-    pub price: f64,
+    pub price: Decimal,
 
-    /// Zero indicates that the supply is unlimited
-    pub max_quantity: u32,
+    /// -1 indicates that the supply is unlimited
+    pub max_quantity: i64,
 }
 
 /// Represents a desired part
@@ -21,8 +23,8 @@ pub struct Supply {
 #[derive(Debug)]
 pub struct Part {
     pub material: String,
-    pub length: f64,
-    pub quantity: u32,
+    pub length: Fraction,
+    pub quantity: i64,
 }
 
 /// Represents a set of of cuts to perform on an object
@@ -33,7 +35,7 @@ pub struct CutList {
     pub material: String,
 
     /// The original length before cutting
-    pub length: f64,
+    pub length: Fraction,
 
-    pub cuts: Vec<f64>,
+    pub cuts: Vec<Fraction>,
 }

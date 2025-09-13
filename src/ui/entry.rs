@@ -9,7 +9,7 @@ use std::cell::RefCell;
 /// Stores user-entered strings instead of parsed numeric types (fraction::Decimal or
 /// fraction::Fraction). This allows editing the original text when a row is re-selected, and avoids
 /// headaches with storing custom types in a GObject.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct EntryData {
     pub name: String,
     pub material: String,
@@ -36,7 +36,7 @@ mod imp {
         #[property(name = "length-unit", get, set, type = u32, member = length_unit)]
         #[property(name = "length", get, set, type = String, member = length)]
         #[property(name = "sublength", get, set, type = String, member = sublength)]
-        pub data: RefCell<EntryData>,
+        pub entry_data: RefCell<EntryData>,
     }
 
     // The central trait for subclassing a GObject
@@ -74,5 +74,9 @@ impl EntryObject {
             .property("length", length)
             .property("sublength", sublength)
             .build()
+    }
+
+    pub fn entry_data(&self) -> EntryData {
+        self.imp().entry_data.borrow().clone()
     }
 }

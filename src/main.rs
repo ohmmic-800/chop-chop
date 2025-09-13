@@ -1,3 +1,5 @@
+mod modeling;
+mod solvers;
 mod ui;
 
 use adw::Application;

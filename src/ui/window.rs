@@ -1,9 +1,22 @@
+use std::thread;
+use std::time::Duration;
+
+use adw::prelude::*;
 use adw::subclass::prelude::*;
-use gtk::glib::{Object, subclass::InitializingObject};
+use fraction::Fraction;
+use gtk::glib::{Object, clone, subclass::InitializingObject};
+use gtk::prelude::ButtonExt;
 use gtk::{CompositeTemplate, gio, glib};
 
 use super::entry_pane::EntryPane;
+use super::solver_overlay::SolverOverlay;
 use super::solver_pane::SolverPane;
+use crate::modeling::{Part, Supply};
+use crate::solvers::Solver;
+use crate::solvers::naive_solver::NaiveSolver;
+
+const FEET_TO_METERS_NUM: u64 = 3048;
+const FEET_TO_METERS_DEN: u64 = 10000;
 
 mod imp {
     use super::*;
@@ -39,7 +52,13 @@ mod imp {
     }
 
     // Trait shared by all GObjects
-    impl ObjectImpl for Window {}
+    impl ObjectImpl for Window {
+        // Called when the object is constructed
+        fn constructed(&self) {
+            self.parent_constructed();
+            self.obj().setup_callbacks();
+        }
+    }
 
     // Trait shared by all widgets
     impl WidgetImpl for Window {}
@@ -64,5 +83,109 @@ glib::wrapper! {
 impl Window {
     pub fn new(app: &adw::Application) -> Self {
         Object::builder().property("application", app).build()
+    }
+
+    fn setup_callbacks(&self) {
+        self.imp()
+            .solver_pane
+            .imp()
+            .run_button
+            .connect_clicked(clone!(
+                #[weak(rename_to = window)]
+                self,
+                move |_| {
+                    window.run_solver();
+                }
+            ));
+    }
+
+    // TODO: Break up
+    fn run_solver(&self) {
+        let supplies_pane = &self.imp().supplies_pane;
+        let supplies_entry_data = supplies_pane.entry_data_vec();
+        let mut supplies = Vec::<Supply>::with_capacity(supplies_entry_data.len());
+        for entry_data in supplies_entry_data {
+            let length = self.length_to_meters(
+                supplies_pane.parse_length(&entry_data.length).unwrap(),
+                supplies_pane
+                    .parse_length_optional(&entry_data.sublength)
+                    .unwrap(),
+                entry_data.length_unit,
+            );
+            supplies.push(Supply {
+                material: entry_data.material,
+                length: length,
+                price: supplies_pane.parse_price(&entry_data.price).unwrap(),
+                max_quantity: supplies_pane.parse_quantity(&entry_data.quantity).unwrap(),
+            });
+        }
+
+        let parts_pane = &self.imp().parts_pane;
+        let parts_entry_data = parts_pane.entry_data_vec();
+        let mut parts = Vec::<Part>::with_capacity(parts_entry_data.len());
+        for entry_data in parts_entry_data {
+            let length = self.length_to_meters(
+                parts_pane.parse_length(&entry_data.length).unwrap(),
+                parts_pane
+                    .parse_length_optional(&entry_data.sublength)
+                    .unwrap(),
+                entry_data.length_unit,
+            );
+            parts.push(Part {
+                material: entry_data.material,
+                length: length,
+                quantity: supplies_pane.parse_quantity(&entry_data.quantity).unwrap(),
+            });
+        }
+
+        // https://gtk-rs.org/gtk4-rs/git/book/main_event_loop.html#channels
+
+        let overlay = SolverOverlay::new();
+        overlay.set_can_close(false);
+        overlay.present(Some(self));
+
+        let (sender, receiver) = async_channel::bounded(1);
+
+        // TODO: Replace this with the actual solver logic
+        // TODO: Pass solvers a progress callback
+        gio::spawn_blocking(move || {
+            // TODO: Select correct solver
+            let solver = NaiveSolver {};
+            let solution = solver.solve(&supplies, &parts).unwrap();
+            println!("Solving done!");
+            dbg!(solution);
+            let t = 5;
+            for i in 0..t {
+                let progress = (i as f64) / (t as f64);
+                sender.send_blocking(progress).expect("Channel closed");
+                thread::sleep(Duration::from_secs(1));
+            }
+            sender.send_blocking(1.0).expect("Channel closed");
+        });
+
+        glib::spawn_future_local(clone!(
+            #[weak]
+            overlay,
+            async move {
+                while let Ok(progress) = receiver.recv().await {
+                    overlay.update_progress(progress);
+                    if progress == 1.0 {
+                        overlay.force_close();
+                    }
+                }
+            }
+        ));
+    }
+
+    // TODO: Move this somewhere else
+    fn length_to_meters(&self, length: Fraction, sublength: Fraction, unit: u32) -> Fraction {
+        let feet_to_meters = Fraction::new(FEET_TO_METERS_NUM, FEET_TO_METERS_DEN);
+        match unit {
+            0 => feet_to_meters * (length + sublength * 12),
+            1 => feet_to_meters * sublength * 12,
+            2 => length,
+            3 => length / 100,
+            _ => panic!(),
+        }
     }
 }

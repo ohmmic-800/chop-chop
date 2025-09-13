@@ -7,7 +7,7 @@ use fraction::{Decimal, Fraction, Zero};
 use gtk::glib::{Properties, clone, subclass::InitializingObject};
 use gtk::{gio::ListStore, glib};
 
-use super::entry::EntryObject;
+use super::entry::{EntryData, EntryObject};
 
 // TOOD: Optimize creation of new String object (as opposed to passing &str refs)
 // TODO: Review pub qualifiers (only use where they make sense)
@@ -110,6 +110,14 @@ glib::wrapper! {
 }
 
 impl EntryPane {
+    pub fn entry_data_vec(&self) -> Vec<EntryData> {
+        self.entries()
+            .iter::<EntryObject>()
+            .filter_map(Result::ok)
+            .map(|x| x.entry_data())
+            .collect()
+    }
+
     fn add_entry(&self) {
         self.entries().append(&self.parse_all_fields());
 
@@ -138,6 +146,7 @@ impl EntryPane {
 
     fn format_length(&self, entry_object: &EntryObject) -> String {
         let mut output = self.format_fraction(&entry_object.length());
+        // TODO: Use an enum for length units
         output += match entry_object.length_unit() {
             0 => "ft",
             1 => "in",
@@ -197,7 +206,9 @@ impl EntryPane {
         )
     }
 
-    fn parse_length(&self, text: &str) -> Result<Fraction, ()> {
+    // TODO: Move parsing logic somewhere else?
+
+    pub fn parse_length(&self, text: &str) -> Result<Fraction, ()> {
         let tokens: Vec<_> = text.trim().split(" ").filter(|s| !s.is_empty()).collect();
         if tokens.is_empty() || (tokens.len() > 2) {
             Err(())
@@ -213,8 +224,25 @@ impl EntryPane {
         }
     }
 
+    // TODO: Consolidate
+    pub fn parse_length_optional(&self, text: &str) -> Result<Fraction, ()> {
+        let tokens: Vec<_> = text.trim().split(" ").filter(|s| !s.is_empty()).collect();
+        if tokens.len() > 2 {
+            Err(())
+        } else {
+            let mut length = Fraction::zero();
+            for token in tokens {
+                length += match Fraction::from_str(token) {
+                    Ok(value) if (value >= Fraction::zero()) => value,
+                    _ => return Err(()),
+                };
+            }
+            Ok(length)
+        }
+    }
+
     /// Currently this allows specifying price via fraction string
-    fn parse_price(&self, text: &str) -> Result<Decimal, ()> {
+    pub fn parse_price(&self, text: &str) -> Result<Decimal, ()> {
         let text = text.trim();
         if text.is_empty() {
             Ok(Decimal::zero())
@@ -226,7 +254,7 @@ impl EntryPane {
         }
     }
 
-    fn parse_quantity(&self, text: &str) -> Result<i64, ()> {
+    pub fn parse_quantity(&self, text: &str) -> Result<i64, ()> {
         let text = text.trim();
         if text.is_empty() {
             if self.require_quantity() {
