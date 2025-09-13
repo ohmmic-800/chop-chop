@@ -2,7 +2,8 @@ use std::cell::RefCell;
 
 use adw::prelude::*;
 use adw::subclass::prelude::*;
-use gtk::glib::subclass::InitializingObject;
+use gtk::cairo::Context;
+use gtk::glib::{clone, subclass::InitializingObject};
 use gtk::{CompositeTemplate, PrintOperation, glib};
 
 use crate::solvers::Solution;
@@ -77,6 +78,53 @@ glib::wrapper! {
 impl SolverPane {
     pub fn update_result(&self, result: Result<Solution, String>) {
         self.imp().result.replace(Some(result));
+        self.imp().drawing_area.queue_draw();
+    }
+
+    fn draw_result(&self, cairo: &Context, w: i32, h: i32) {
+        //Initi pango and set a font
+        let font_description = pango::FontDescription::from_string("sans 14");
+        let pango_layout = pangocairo::functions::create_layout(cairo);
+        pango_layout.set_font_description(Option::from(&font_description));
+
+        cairo.set_source_rgb(1.0, 0.5, 0.5);
+        cairo.rectangle(5.0, 5.0, (w as f64) - 10.0, (h as f64) - 10.0);
+        cairo.stroke().unwrap();
+        cairo.move_to(10.0, 10.0);
+
+        let result = self.imp().result.borrow();
+        if result.is_none() {
+            pango_layout.set_text("Solver not yet run");
+        } else {
+            match result.as_ref().unwrap() {
+                // TODO: Need more info here!
+                // TODO: Return to original unit
+                // TODO: Use actual supply name
+                // TODO: For each supply, provide list of cuts and amount to purchase
+                Ok(solution) => {
+                    let mut text = String::from("Solver ran successfully\nResults:\n");
+                    text.push_str(&format!("Total price: ${:.2}\n", solution.total_price));
+                    for (i, (cut_list, supply_consumption)) in solution
+                        .cut_lists
+                        .iter()
+                        .zip(solution.supply_consumption.iter())
+                        .enumerate()
+                    {
+                        text.push_str(&format!("\nSupply {}\n", i + 1));
+                        text.push_str(&format!("Number consumed: {}\n", supply_consumption));
+                        text.push_str("Cut list (in meters):\n");
+                        for cut in &cut_list.cuts {
+                            text.push_str(&format!("{:.10}\n", cut));
+                        }
+                    }
+                    pango_layout.set_text(&text);
+                }
+                Err(message) => {
+                    pango_layout.set_text(&format!("Solver failed\nMessage: {}", message));
+                }
+            }
+        }
+        pangocairo::functions::show_layout(&cairo, &pango_layout);
     }
 
     fn setup_callbacks(&self) {
@@ -85,76 +133,49 @@ impl SolverPane {
 
         // TODO: Print button in bottom adwaita toolbar alongside delete button?
 
-        self.imp()
-            .drawing_area
-            .set_draw_func(move |_area, cairo, w, h| {
-                //Initi pango and set a font
-                let font_description = pango::FontDescription::from_string("sans 14");
-                let pango_layout = pangocairo::functions::create_layout(cairo);
-                pango_layout.set_font_description(Option::from(&font_description));
-
-                cairo.set_source_rgb(1.0, 0.5, 0.5);
-                cairo.rectangle(5.0, 5.0, (w as f64) - 10.0, (h as f64) - 10.0);
-                cairo.stroke().unwrap();
-
-                // Draw text1
-                pango_layout.set_text("Hello");
-                cairo.move_to(10.0, 10.0);
-                pangocairo::functions::show_layout(&cairo, &pango_layout);
-
-                //Draw text2 below text1
-                pango_layout.set_text("World");
-                cairo.rel_move_to(0.0, 20.0);
-                pangocairo::functions::show_layout(&cairo, &pango_layout);
-            });
+        self.imp().drawing_area.set_draw_func(clone!(
+            #[weak(rename_to = pane)]
+            self,
+            move |_area, cairo, w, h| {
+                pane.draw_result(cairo, w, h);
+            }
+        ));
 
         // Based on this example:
         // https://github.com/gtk-rs/examples/blob/master/src/bin/printing.rs
-        self.imp().print_button.connect_clicked(move |_| {
-            // TODO: Some parts of the dialog may be disablable using builder options
-            let print_operation = PrintOperation::new();
+        self.imp().print_button.connect_clicked(clone!(
+            #[weak(rename_to = pane)]
+            self,
+            move |_| {
+                // TODO: Some parts of the dialog may be disablable using builder options
+                let print_operation = PrintOperation::new();
 
-            print_operation.connect_begin_print(move |print_operation, _| {
-                // This sets the number of pages of the document.
-                // You most likely will calculate this, but for this example
-                // it's hardcoded as 1
-                print_operation.set_n_pages(1);
-            });
+                print_operation.connect_begin_print(move |print_operation, _| {
+                    // This sets the number of pages of the document.
+                    // You most likely will calculate this, but for this example
+                    // it's hardcoded as 1
+                    print_operation.set_n_pages(1);
+                });
 
-            print_operation.connect_draw_page(move |_, print_context, _| {
-                let cairo = print_context.cairo_context();
+                print_operation.connect_draw_page(clone!(
+                    #[weak]
+                    pane,
+                    move |_, print_context, _| {
+                        pane.draw_result(
+                            &print_context.cairo_context(),
+                            print_context.width() as i32,
+                            print_context.height() as i32,
+                        );
+                    }
+                ));
 
-                let w = print_context.width();
-                let h = print_context.height();
-
-                //Initi pango and set a font
-                let font_description = pango::FontDescription::from_string("sans 14");
-                let pango_layout = pangocairo::functions::create_layout(&cairo);
-
-                // let pango_layout = print_context.create_pango_layout();
-                pango_layout.set_font_description(Option::from(&font_description));
-
-                cairo.set_source_rgb(1.0, 0.5, 0.5);
-                cairo.rectangle(5.0, 5.0, w - 10.0, h - 10.0);
-                cairo.stroke().unwrap();
-
-                // Draw text1
-                pango_layout.set_text("Hello");
-                cairo.move_to(10.0, 10.0);
-                pangocairo::functions::show_layout(&cairo, &pango_layout);
-
-                //Draw text2 below text1
-                pango_layout.set_text("World");
-                cairo.rel_move_to(0.0, 20.0);
-                pangocairo::functions::show_layout(&cairo, &pango_layout);
-            });
-
-            print_operation
-                .run(
-                    gtk::PrintOperationAction::PrintDialog,
-                    Option::<&gtk::ApplicationWindow>::None,
-                )
-                .unwrap();
-        });
+                print_operation
+                    .run(
+                        gtk::PrintOperationAction::PrintDialog,
+                        Option::<&gtk::ApplicationWindow>::None,
+                    )
+                    .unwrap();
+            }
+        ));
     }
 }

@@ -45,7 +45,7 @@ impl Solver for NaiveSolver {
                         if (part.length <= supply.length)
                             && (part.material == supply.material)
                             && ((supply_consumption[i] < supply.max_quantity)
-                                || (supply.max_quantity == 0))
+                                || (supply.max_quantity == -1))
                             && (supply.price < best_price)
                         {
                             best_supply = i;

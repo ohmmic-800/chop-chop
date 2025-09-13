@@ -38,7 +38,7 @@ pub trait Solver {
 #[derive(Debug, Clone)]
 #[allow(dead_code)] // TODO: Temporary
 pub struct Solution {
-    cut_lists: Vec<CutList>,
-    supply_consumption: Vec<i64>,
-    total_price: Decimal,
+    pub cut_lists: Vec<CutList>,
+    pub supply_consumption: Vec<i64>,
+    pub total_price: Decimal,
 }

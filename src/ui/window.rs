@@ -1,3 +1,6 @@
+use std::thread::sleep;
+use std::time::Duration;
+
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use fraction::Fraction;
@@ -150,6 +153,14 @@ impl Window {
         gio::spawn_blocking(move || {
             // TODO: Select correct solver
             let solver = NaiveSolver {};
+
+            // To ensure the dialog and placeholder are working
+            sleep(Duration::from_secs(1));
+            progress_sender
+                .send_blocking(0.5)
+                .expect("Connection closed");
+            sleep(Duration::from_secs(1));
+
             let _ = solver.solve(
                 &supplies,
                 &parts,
