@@ -135,8 +135,8 @@ impl Window {
                         overlay.force_close();
                     }
                 }
-                let result = result_receiver.recv().await.expect("Channel closed");
-                window.imp().solver_pane.update_result(result);
+                let results = result_receiver.recv().await.expect("Channel closed");
+                window.imp().solver_pane.update_results(results);
             }
         ));
     }

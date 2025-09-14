@@ -2,10 +2,11 @@ use std::cell::RefCell;
 
 use adw::prelude::*;
 use adw::subclass::prelude::*;
-use gtk::cairo::Context;
 use gtk::glib::{clone, subclass::InitializingObject};
-use gtk::{CompositeTemplate, PrintOperation, glib};
+use gtk::{CompositeTemplate, PrintOperationAction::PrintDialog, cairo, glib};
+use pangocairo::functions::{create_layout, show_layout};
 
+use super::window::Window;
 use crate::solvers::Solution;
 
 mod imp {
@@ -34,7 +35,7 @@ mod imp {
         pub drawing_area: TemplateChild<gtk::DrawingArea>,
 
         // Solver result
-        pub result: RefCell<Option<Result<Solution, String>>>,
+        pub results: RefCell<Option<Result<Solution, String>>>,
     }
 
     // The central trait for subclassing a GObject
@@ -79,112 +80,109 @@ glib::wrapper! {
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Orientable;
 }
 
-// TODO: Copy code from supplies pane after optimizing/refining
 impl SolverPane {
-    pub fn update_result(&self, result: Result<Solution, String>) {
-        self.imp().result.replace(Some(result));
+    pub fn update_results(&self, results: Result<Solution, String>) {
+        self.imp().results.replace(Some(results));
         self.imp().drawing_area.queue_draw();
         self.update_placeholder();
     }
 
-    fn draw_result(&self, cairo: &Context, w: i32, h: i32) {
-        //Initi pango and set a font
-        let font_description = pango::FontDescription::from_string("sans 14");
-        let pango_layout = pangocairo::functions::create_layout(cairo);
-        pango_layout.set_font_description(Option::from(&font_description));
+    fn draw_results(&self, c: &cairo::Context, w: f64, h: f64, force_light_bg: bool) {
+        // Init pango and set a font
+        let p = create_layout(c);
+        p.set_font_description(Some(&pango::FontDescription::from_string("sans 14")));
 
-        cairo.set_source_rgb(1.0, 0.5, 0.5);
-        cairo.rectangle(20.0, 20.0, (w as f64) - 40.0, (h as f64) - 40.0);
-        cairo.stroke().unwrap();
-        cairo.move_to(40.0, 40.0);
-
-        let result = self.imp().result.borrow();
-        if result.is_none() {
-            pango_layout.set_text("Solver not yet run");
+        // Foreground color depends on dark mode and whether we are printing
+        if force_light_bg {
+            c.set_source_rgb(0.0, 0.0, 0.0);
         } else {
-            match result.as_ref().unwrap() {
-                // TODO: Need more info here!
-                // TODO: Return to original unit
-                // TODO: Use actual supply name
-                // TODO: For each supply, provide list of cuts and amount to purchase
-                Ok(solution) => {
-                    let mut text = String::from("Solver ran successfully\nResults:\n");
-                    text.push_str(&format!("Total price: ${:.2}\n", solution.total_price));
-                    for (i, (cut_list, supply_consumption)) in solution
-                        .cut_lists
-                        .iter()
-                        .zip(solution.supply_consumption.iter())
-                        .enumerate()
-                    {
-                        text.push_str(&format!("\nSupply {}\n", i + 1));
-                        text.push_str(&format!("Number consumed: {}\n", supply_consumption));
-                        text.push_str("Cut list (in meters):\n");
-                        for cut in &cut_list.cuts {
-                            text.push_str(&format!("{:.10}\n", cut));
-                        }
-                    }
-                    pango_layout.set_text(&text);
-                }
-                Err(message) => {
-                    pango_layout.set_text(&format!("Solver failed\nMessage: {}", message));
-                }
+            c.set_source_color(&self.color());
+        }
+
+        // TODO: Remove (temporary to demonstrate drawing shapes)
+        c.rectangle(20.0, 20.0, w - 40.0, h - 40.0);
+        c.stroke().unwrap();
+        c.move_to(40.0, 40.0);
+
+        match self.imp().results.borrow().as_ref() {
+            Some(Ok(solution)) => {
+                Self::draw_solution(solution, c, &p, w, h);
+            }
+            Some(Err(message)) => {
+                p.set_text(&format!("Solver failed\nMessage: {}", message));
+                show_layout(c, &p);
+            }
+            None => {
+                p.set_text("Run solver to view solution");
+                show_layout(c, &p);
             }
         }
-        pangocairo::functions::show_layout(&cairo, &pango_layout);
+    }
+
+    fn draw_solution(solution: &Solution, c: &cairo::Context, p: &pango::Layout, _w: f64, _h: f64) {
+        let mut text = String::from("Solver ran successfully\nResults:\n");
+        text.push_str(&format!("Total price: ${:.2}\n", solution.total_price));
+        for (i, (cut_list, supply_consumption)) in solution
+            .cut_lists
+            .iter()
+            .zip(solution.supply_consumption.iter())
+            .enumerate()
+        {
+            text.push_str(&format!("\nSupply {}\n", i + 1));
+            text.push_str(&format!("Number consumed: {}\n", supply_consumption));
+            text.push_str("Cut list (in meters):\n");
+            for cut in &cut_list.cuts {
+                text.push_str(&format!("{:.10}\n", cut));
+            }
+        }
+        p.set_text(&text);
+        show_layout(c, p);
+    }
+
+    // https://github.com/gtk-rs/examples/blob/master/src/bin/printing.rs
+    fn print_results(&self) {
+        let print_operation = gtk::PrintOperation::new();
+        print_operation.connect_begin_print(move |print_operation, _| {
+            // TODO: Calculate the number of pages dynamically
+            print_operation.set_n_pages(1);
+        });
+        print_operation.connect_draw_page(clone!(
+            #[weak(rename_to = pane)]
+            self,
+            move |_, print_context, _| {
+                pane.draw_results(
+                    &print_context.cairo_context(),
+                    print_context.width(),
+                    print_context.height(),
+                    true,
+                );
+            }
+        ));
+        print_operation
+            .run(PrintDialog, self.root().and_downcast_ref::<Window>())
+            .unwrap();
     }
 
     fn setup_callbacks(&self) {
-        // TODO: Ensure output looks the same when printed
-        // Has something to do with resolution (display units)
-
-        self.imp().drawing_area.set_draw_func(clone!(
+        let imp = self.imp();
+        imp.drawing_area.set_draw_func(clone!(
             #[weak(rename_to = pane)]
             self,
-            move |_area, cairo, w, h| {
-                pane.draw_result(cairo, w, h);
+            move |_, cairo, w, h| {
+                pane.draw_results(cairo, w as f64, h as f64, false);
             }
         ));
-
-        // Based on this example:
-        // https://github.com/gtk-rs/examples/blob/master/src/bin/printing.rs
-        self.imp().print_button.connect_clicked(clone!(
+        imp.print_button.connect_clicked(clone!(
             #[weak(rename_to = pane)]
             self,
             move |_| {
-                // TODO: Some parts of the dialog may be disablable using builder options
-                let print_operation = PrintOperation::new();
-
-                print_operation.connect_begin_print(move |print_operation, _| {
-                    // This sets the number of pages of the document.
-                    // You most likely will calculate this, but for this example
-                    // it's hardcoded as 1
-                    print_operation.set_n_pages(1);
-                });
-
-                print_operation.connect_draw_page(clone!(
-                    #[weak]
-                    pane,
-                    move |_, print_context, _| {
-                        pane.draw_result(
-                            &print_context.cairo_context(),
-                            print_context.width() as i32,
-                            print_context.height() as i32,
-                        );
-                    }
-                ));
-
-                print_operation
-                    .run(
-                        gtk::PrintOperationAction::PrintDialog,
-                        Option::<&gtk::ApplicationWindow>::None,
-                    )
-                    .unwrap();
+                pane.print_results();
             }
         ));
     }
 
     fn update_placeholder(&self) {
-        let name = if self.imp().result.borrow().is_none() {
+        let name = if self.imp().results.borrow().is_none() {
             "placeholder"
         } else {
             "nonempty"
