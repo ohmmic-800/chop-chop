@@ -94,9 +94,9 @@ impl SolverPane {
         pango_layout.set_font_description(Option::from(&font_description));
 
         cairo.set_source_rgb(1.0, 0.5, 0.5);
-        cairo.rectangle(5.0, 5.0, (w as f64) - 10.0, (h as f64) - 10.0);
+        cairo.rectangle(20.0, 20.0, (w as f64) - 40.0, (h as f64) - 40.0);
         cairo.stroke().unwrap();
-        cairo.move_to(10.0, 10.0);
+        cairo.move_to(40.0, 40.0);
 
         let result = self.imp().result.borrow();
         if result.is_none() {
@@ -136,8 +136,6 @@ impl SolverPane {
     fn setup_callbacks(&self) {
         // TODO: Ensure output looks the same when printed
         // Has something to do with resolution (display units)
-
-        // TODO: Print button in bottom adwaita toolbar alongside delete button?
 
         self.imp().drawing_area.set_draw_func(clone!(
             #[weak(rename_to = pane)]

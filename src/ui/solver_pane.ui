@@ -3,6 +3,13 @@
   <requires lib="gtk" version="4.10" />
   <requires lib="libadwaita" version="1.4" />
   <template class="ChopChopSolverPane" parent="GtkBox">
+    <object class="GtkSizeGroup">
+      <property name="mode">horizontal</property>
+      <widgets>
+        <widget name="clear_button" />
+        <widget name="print_button" />
+      </widgets>
+    </object>
     <child>
       <object class="AdwOverlaySplitView">
         <property name="hexpand">true</property>
@@ -38,16 +45,7 @@
               <object class="GtkButton" id="run_button">
                 <property name="label">Solve</property>
                 <style>
-                  <class name="pill" />
                   <class name="suggested-action" />
-                </style>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="print_button">
-                <property name="label">Print</property>
-                <style>
-                  <class name="pill" />
                 </style>
               </object>
             </child>
@@ -59,7 +57,36 @@
               <object class="GtkStackPage">
                 <property name="name">nonempty</property>
                 <property name="child">
-                  <object class="GtkDrawingArea" id="drawing_area"></object>
+                  <object class="AdwToolbarView">
+                    <property name="bottom-bar-style">raised</property>
+                    <child type="bottom">
+                      <object class="GtkCenterBox">
+                        <property name="margin-start">4</property>
+                        <property name="margin-end">4</property>
+                        <property name="margin-top">4</property>
+                        <property name="margin-bottom">4</property>
+                        <child type="start">
+                          <object class="GtkButton" id="clear_button">
+                            <property name="label">Clear</property>
+                            <style>
+                              <class name="destructive-action" />
+                            </style>
+                          </object>
+                        </child>
+                        <child type="end">
+                          <object class="GtkButton" id="print_button">
+                            <property name="label">Print</property>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="toolbar" />
+                        </style>
+                      </object>
+                    </child>
+                    <property name="content">
+                      <object class="GtkDrawingArea" id="drawing_area"></object>
+                    </property>
+                  </object>
                 </property>
               </object>
             </child>
