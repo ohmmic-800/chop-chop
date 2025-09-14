@@ -56,7 +56,7 @@ impl Solver for NaiveSolver {
                         // May be triggered even if valid solutions exist
                         let result =
                             Err(String::from("No materials available with sufficient size"));
-                        Self::send_final_result(result.clone(), progress_sender, result_sender);
+                        self.send_final_result(result.clone(), progress_sender, result_sender);
                         return result;
                     } else {
                         // TODO: Is .clone() the right way to do this?
@@ -77,7 +77,7 @@ impl Solver for NaiveSolver {
             supply_consumption,
             total_price,
         });
-        Self::send_final_result(solution.clone(), progress_sender, result_sender);
+        self.send_final_result(solution.clone(), progress_sender, result_sender);
         solution
     }
 }

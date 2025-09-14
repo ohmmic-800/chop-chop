@@ -7,7 +7,7 @@ use gtk::{CompositeTemplate, PrintOperationAction::PrintDialog, cairo, glib};
 use pangocairo::functions::{create_layout, show_layout};
 
 use super::window::Window;
-use crate::solvers::Solution;
+use crate::solvers::{Solution, Solver, naive_solver::NaiveSolver};
 
 mod imp {
     use super::*;
@@ -81,6 +81,14 @@ glib::wrapper! {
 }
 
 impl SolverPane {
+    // The Send trait is required because the solver will be sent to the worker thread
+    pub fn create_solver(&self) -> Box<dyn Solver + Send> {
+        match self.imp().solver_field.selected() {
+            0 => Box::new(NaiveSolver {}),
+            _ => panic!(),
+        }
+    }
+
     pub fn update_results(&self, results: Result<Solution, String>) {
         self.imp().results.replace(Some(results));
         self.imp().drawing_area.queue_draw();

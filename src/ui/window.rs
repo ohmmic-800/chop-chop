@@ -10,7 +10,6 @@ use super::entry_pane::EntryPane;
 use super::solver_overlay::SolverOverlay;
 use super::solver_pane::SolverPane;
 use super::utils::*;
-use crate::solvers::{Solver, naive_solver::NaiveSolver};
 
 mod imp {
     use super::*;
@@ -99,8 +98,7 @@ impl Window {
         let overlay = SolverOverlay::new();
         overlay.present(Some(self));
 
-        // TODO: Select correct solver
-        let solver = NaiveSolver {};
+        let solver = self.imp().solver_pane.create_solver();
         let supplies = parse_supply_entries(self.imp().supplies_pane.entry_data());
         let parts = parse_part_entries(self.imp().parts_pane.entry_data());
 

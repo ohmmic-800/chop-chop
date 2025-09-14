@@ -14,8 +14,8 @@ pub trait Solver {
         result_sender: Option<Sender<Result<Solution, String>>>,
     ) -> Result<Solution, String>;
 
-    // TODO: Make this a method?
     fn send_final_result(
+        &self,
         result: Result<Solution, String>,
         progress_sender: Option<Sender<f64>>,
         result_sender: Option<Sender<Result<Solution, String>>>,
@@ -36,7 +36,6 @@ pub trait Solver {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)] // TODO: Temporary
 pub struct Solution {
     pub cut_lists: Vec<CutList>,
     pub supply_consumption: Vec<i64>,
