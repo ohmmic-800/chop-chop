@@ -350,10 +350,10 @@ impl EntryPane {
     }
 
     fn update_placeholder(&self) {
-        let name = if self.n_items() != 0 {
-            "nonempty"
-        } else {
+        let name = if self.n_items() == 0 {
             "placeholder"
+        } else {
+            "nonempty"
         };
         self.imp().content_stack.set_visible_child_name(name);
     }

@@ -25,6 +25,10 @@ mod imp {
         #[template_child]
         pub print_button: TemplateChild<gtk::Button>,
 
+        // Used to switch between the column view and a placeholder
+        #[template_child]
+        pub content_stack: TemplateChild<gtk::Stack>,
+
         // Solution view
         #[template_child]
         pub drawing_area: TemplateChild<gtk::DrawingArea>,
@@ -58,6 +62,7 @@ mod imp {
             self.parent_constructed();
             let obj = self.obj();
             obj.setup_callbacks();
+            obj.update_placeholder();
         }
     }
 
@@ -79,6 +84,7 @@ impl SolverPane {
     pub fn update_result(&self, result: Result<Solution, String>) {
         self.imp().result.replace(Some(result));
         self.imp().drawing_area.queue_draw();
+        self.update_placeholder();
     }
 
     fn draw_result(&self, cairo: &Context, w: i32, h: i32) {
@@ -177,5 +183,14 @@ impl SolverPane {
                     .unwrap();
             }
         ));
+    }
+
+    fn update_placeholder(&self) {
+        let name = if self.imp().result.borrow().is_none() {
+            "placeholder"
+        } else {
+            "nonempty"
+        };
+        self.imp().content_stack.set_visible_child_name(name);
     }
 }

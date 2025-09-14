@@ -14,6 +14,7 @@
   <gresource prefix="/com/ohmm-software/Chop-Chop/icons/scalable/actions/">
     <file preprocess="xml-stripblanks">build-alt-symbolic.svg</file>
     <file preprocess="xml-stripblanks">build-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">info-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">running-symbolic.svg</file>
   </gresource>
 </gresources>

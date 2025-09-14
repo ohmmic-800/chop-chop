@@ -152,7 +152,7 @@
                 <property name="name">placeholder</property>
                 <property name="child">
                   <object class="AdwStatusPage">
-                    <property name="icon-name">build-symbolic</property>
+                    <property name="icon-name">info-outline-symbolic</property>
                     <property name="title">Nothing Added</property>
                     <property name="description">Add entries using the sidebar.</property>
                   </object>
