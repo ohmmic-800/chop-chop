@@ -50,17 +50,19 @@ cargo test -- --nocapture
 - [x] Improve column value formatting (currency symbol for price, combined length column)
 - [x] Adjust column widths
 - [x] Improve window scaling behavior
-- [ ] Carry changes over to parts pane (avoiding repeated code)
+- [x] Carry changes over to parts pane (avoiding repeated code)
+- [x] Show a graphic/instructions if there are no solver results
+- [ ] Option to clear fields after adding
 - [ ] Show a suggestion drop-down for materials (existing materials)
 - [ ] Add basic keyboard shortcuts (for three button actions)
 - [ ] Add unit conversions
-- [ ] Show a graphic/instructions if there are no solver results
 
 ### Long-Term
 
 - [ ] Allow configuring fraction display format
+- [ ] Option to merge rows if they share material+length+price (hash table)
 - [ ] Show a popup if selecting a new row would discard changes (config option?)
-- [ ] Define algorithm spec so people can add their own
+- [ ] Define algorithm spec so people can add their own (external Python)
 - [ ] Allow sorting columns ascending/descending
 - [ ] Allow filtering columns by vaule
 - [ ] Support basic formulas for lengths
