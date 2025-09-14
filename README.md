@@ -6,6 +6,8 @@ Follow the instructions [here](https://gtk-rs.org/gtk4-rs/git/book/installation.
 
 If using Visual Studio Code, install the [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension. See the VSCode [Rust language page](https://code.visualstudio.com/docs/languages/rust).
 
+ctrl+alt for inlay hints
+
 ## Building
 
 The following command will build and run the application:
@@ -29,11 +31,6 @@ cargo test -- --nocapture
 ```
 
 ## Todos
-
-### Itzel Suggestions
-
-
-- Settings at the top-right
 
 ### Short-Term
 

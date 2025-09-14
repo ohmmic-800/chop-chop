@@ -110,7 +110,38 @@
                   <object class="GtkScrolledWindow">
                     <property name="width_request">350</property>
                     <child>
-                      <object class="GtkColumnView" id="column_view"></object>
+                      <object class="GtkColumnView" id="column_view">
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Name</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Material</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Price</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Quantity</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Length</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                      </object>
                     </child>
                   </object>
                 </property>

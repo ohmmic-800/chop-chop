@@ -3,6 +3,7 @@
   <requires lib="gtk" version="4.10" />
   <requires lib="libadwaita" version="1.4" />
   <template class="ChopChopSolverOverlay" parent="AdwDialog">
+    <property name="can-close">false</property>
     <property name="content-width">400</property>
     <property name="content-height">250</property>
     <child>

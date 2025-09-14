@@ -1,6 +1,7 @@
 mod modeling;
 mod solvers;
 mod ui;
+mod units;
 
 use adw::Application;
 use adw::prelude::*;

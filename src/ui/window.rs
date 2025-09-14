@@ -3,26 +3,20 @@ use std::time::Duration;
 
 use adw::prelude::*;
 use adw::subclass::prelude::*;
-use fraction::Fraction;
 use gtk::glib::{Object, clone, subclass::InitializingObject};
-use gtk::prelude::ButtonExt;
-use gtk::{CompositeTemplate, gio, glib};
+use gtk::{gio, glib};
 
 use super::entry_pane::EntryPane;
 use super::solver_overlay::SolverOverlay;
 use super::solver_pane::SolverPane;
-use crate::modeling::{Part, Supply};
-use crate::solvers::Solver;
-use crate::solvers::naive_solver::NaiveSolver;
-
-const FEET_TO_METERS_NUM: u64 = 3048;
-const FEET_TO_METERS_DEN: u64 = 10000;
+use super::utils::*;
+use crate::solvers::{Solver, naive_solver::NaiveSolver};
 
 mod imp {
     use super::*;
 
     // Object holding the state
-    #[derive(CompositeTemplate, Default)]
+    #[derive(gtk::CompositeTemplate, Default)]
     #[template(resource = "/com/ohmm-software/Chop-Chop/window.ui")]
     pub struct Window {
         #[template_child]
@@ -100,61 +94,21 @@ impl Window {
             ));
     }
 
-    // TODO: Break up
+    // https://gtk-rs.org/gtk4-rs/git/book/main_event_loop.html#channels
     fn run_solver(&self) {
-        let supplies_pane = &self.imp().supplies_pane;
-        let supplies_entry_data = supplies_pane.entry_data_vec();
-        let mut supplies = Vec::<Supply>::with_capacity(supplies_entry_data.len());
-        for entry_data in supplies_entry_data {
-            let length = self.length_to_meters(
-                supplies_pane.parse_length(&entry_data.length).unwrap(),
-                supplies_pane
-                    .parse_length_optional(&entry_data.sublength)
-                    .unwrap(),
-                entry_data.length_unit,
-            );
-            supplies.push(Supply {
-                material: entry_data.material,
-                length: length,
-                price: supplies_pane.parse_price(&entry_data.price).unwrap(),
-                max_quantity: supplies_pane.parse_quantity(&entry_data.quantity).unwrap(),
-            });
-        }
-
-        let parts_pane = &self.imp().parts_pane;
-        let parts_entry_data = parts_pane.entry_data_vec();
-        let mut parts = Vec::<Part>::with_capacity(parts_entry_data.len());
-        for entry_data in parts_entry_data {
-            let length = self.length_to_meters(
-                parts_pane.parse_length(&entry_data.length).unwrap(),
-                parts_pane
-                    .parse_length_optional(&entry_data.sublength)
-                    .unwrap(),
-                entry_data.length_unit,
-            );
-            parts.push(Part {
-                material: entry_data.material,
-                length: length,
-                quantity: supplies_pane.parse_quantity(&entry_data.quantity).unwrap(),
-            });
-        }
-
-        // https://gtk-rs.org/gtk4-rs/git/book/main_event_loop.html#channels
-
         let overlay = SolverOverlay::new();
-        overlay.set_can_close(false);
         overlay.present(Some(self));
+
+        // TODO: Select correct solver
+        let solver = NaiveSolver {};
+        let supplies = parse_supply_entries(self.imp().supplies_pane.entry_data());
+        let parts = parse_part_entries(self.imp().parts_pane.entry_data());
 
         let (progress_sender, progress_receiver) = async_channel::bounded(1);
         let (result_sender, result_receiver) = async_channel::bounded(1);
 
-        // TODO: Replace this with the actual solver logic
-        // TODO: Pass solvers a progress callback
         gio::spawn_blocking(move || {
-            // TODO: Select correct solver
-            let solver = NaiveSolver {};
-
-            // To ensure the dialog and placeholder are working
+            // TODO: Remove (temporary to ensure the dialog and placeholder are working)
             sleep(Duration::from_secs(1));
             progress_sender
                 .send_blocking(0.5)
@@ -167,7 +121,6 @@ impl Window {
                 Some(progress_sender),
                 Some(result_sender),
             );
-            println!("Solving done!");
         });
 
         glib::spawn_future_local(clone!(
@@ -178,7 +131,7 @@ impl Window {
             async move {
                 while let Ok(progress) = progress_receiver.recv().await {
                     overlay.update_progress(progress);
-                    if progress == 1.0 {
+                    if progress >= 1.0 {
                         overlay.force_close();
                     }
                 }
@@ -186,17 +139,5 @@ impl Window {
                 window.imp().solver_pane.update_result(result);
             }
         ));
-    }
-
-    // TODO: Move this somewhere else
-    fn length_to_meters(&self, length: Fraction, sublength: Fraction, unit: u32) -> Fraction {
-        let feet_to_meters = Fraction::new(FEET_TO_METERS_NUM, FEET_TO_METERS_DEN);
-        match unit {
-            0 => feet_to_meters * (length + sublength * 12),
-            1 => feet_to_meters * sublength * 12,
-            2 => length,
-            3 => length / 100,
-            _ => panic!(),
-        }
     }
 }
