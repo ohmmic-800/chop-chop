@@ -21,6 +21,9 @@ fn main() -> glib::ExitCode {
     app.connect_startup(|_| load_css());
     app.connect_activate(build_ui);
 
+    // Set up application-global actions and keybindings
+    setup_actions(&app);
+
     // Run the application
     app.run()
 }
@@ -42,4 +45,12 @@ fn load_css() {
         &provider,
         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
+}
+
+fn setup_actions(app: &Application) {
+    let action = gio::ActionEntry::builder("quit")
+        .activate(|app: &Application, _, _| app.quit())
+        .build();
+    app.add_action_entries([action]);
+    app.set_accels_for_action("app.quit", &["<Ctrl>Q"]);
 }

@@ -81,7 +81,7 @@ impl Window {
     }
 
     fn setup_actions(&self) {
-        let action = gio::ActionEntryBuilder::new("about")
+        let action = gio::ActionEntry::builder("about")
             .activate(|window: &Self, _, _| {
                 create_about_dialog().present(Some(window));
             })

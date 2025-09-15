@@ -26,15 +26,15 @@
                   <menu id="primary_menu">
                     <section>
                       <item>
-                        <attribute name="label" translatable="yes">_Preferences</attribute>
+                        <attribute name="label">_Preferences</attribute>
                         <attribute name="action">app.preferences</attribute>
                       </item>
                       <item>
-                        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+                        <attribute name="label">_Keyboard Shortcuts</attribute>
                         <attribute name="action">win.show-help-overlay</attribute>
                       </item>
                       <item>
-                        <attribute name="label" translatable="yes">_About Chop-Chop</attribute>
+                        <attribute name="label">_About Chop-Chop</attribute>
                         <attribute name="action">win.about</attribute>
                       </item>
                     </section>
