@@ -81,12 +81,17 @@ impl Window {
     }
 
     fn setup_actions(&self) {
-        let action = gio::ActionEntry::builder("about")
+        let about_action = gio::ActionEntry::builder("about")
             .activate(|window: &Self, _, _| {
                 create_about_dialog().present(Some(window));
             })
             .build();
-        self.add_action_entries([action]);
+        let close_action = gio::ActionEntry::builder("close")
+            .activate(|window: &Self, _, _| {
+                window.close();
+            })
+            .build();
+        self.add_action_entries([about_action, close_action]);
     }
 
     fn setup_callbacks(&self) {

@@ -23,6 +23,7 @@ fn main() -> glib::ExitCode {
 
     // Set up application-global actions and keybindings
     setup_actions(&app);
+    setup_accels(&app);
 
     // Run the application
     app.run()
@@ -48,9 +49,13 @@ fn load_css() {
 }
 
 fn setup_actions(app: &Application) {
-    let action = gio::ActionEntry::builder("quit")
+    let quit_action = gio::ActionEntry::builder("quit")
         .activate(|app: &Application, _, _| app.quit())
         .build();
-    app.add_action_entries([action]);
+    app.add_action_entries([quit_action]);
+}
+
+fn setup_accels(app: &Application) {
     app.set_accels_for_action("app.quit", &["<Ctrl>Q"]);
+    app.set_accels_for_action("win.close", &["<Ctrl>W"]);
 }
