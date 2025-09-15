@@ -24,6 +24,8 @@ mod imp {
         #[template_child]
         pub run_button: TemplateChild<gtk::Button>,
         #[template_child]
+        pub clear_button: TemplateChild<gtk::Button>,
+        #[template_child]
         pub print_button: TemplateChild<gtk::Button>,
 
         // Used to switch between the column view and a placeholder
@@ -81,6 +83,12 @@ glib::wrapper! {
 }
 
 impl SolverPane {
+    pub fn clear_results(&self) {
+        self.imp().results.replace(None);
+        self.update_placeholder();
+        self.imp().drawing_area.queue_draw();
+    }
+
     // The Send trait is required because the solver will be sent to the worker thread
     pub fn create_solver(&self) -> Box<dyn Solver + Send> {
         match self.imp().solver_field.selected() {
@@ -178,6 +186,13 @@ impl SolverPane {
             self,
             move |_, cairo, w, h| {
                 pane.draw_results(cairo, w as f64, h as f64, false);
+            }
+        ));
+        imp.clear_button.connect_clicked(clone!(
+            #[weak(rename_to = pane)]
+            self,
+            move |_| {
+                pane.clear_results();
             }
         ));
         imp.print_button.connect_clicked(clone!(

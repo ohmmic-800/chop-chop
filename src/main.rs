@@ -17,7 +17,7 @@ fn main() -> glib::ExitCode {
     // Create a new application
     let app = Application::builder().application_id(APP_ID).build();
 
-    // Connect to "activate" signal of `app`
+    // Connect to the "startup" and "activate" signals
     app.connect_startup(|_| load_css());
     app.connect_activate(build_ui);
 
