@@ -16,5 +16,6 @@
     <file preprocess="xml-stripblanks">build-symbolic.svg</file>
     <file preprocess="xml-stripblanks">info-outline-symbolic.svg</file>
     <file preprocess="xml-stripblanks">running-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">tree-circle-symbolic.svg</file>
   </gresource>
 </gresources>

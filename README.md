@@ -52,6 +52,7 @@ cargo test -- --nocapture
 - [x] Improve window scaling behavior
 - [x] Carry changes over to parts pane (avoiding repeated code)
 - [x] Show a graphic/instructions if there are no solver results
+- [x] Add about page
 - [ ] Option to clear fields after adding
 - [ ] Show a suggestion drop-down for materials (existing materials)
 - [ ] Add basic keyboard shortcuts (for three button actions)

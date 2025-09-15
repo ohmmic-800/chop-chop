@@ -6,6 +6,7 @@ use adw::subclass::prelude::*;
 use gtk::glib::{Object, clone, subclass::InitializingObject};
 use gtk::{gio, glib};
 
+use super::about_dialog::create_about_dialog;
 use super::entry_pane::EntryPane;
 use super::solver_overlay::SolverOverlay;
 use super::solver_pane::SolverPane;
@@ -49,6 +50,7 @@ mod imp {
         // Called when the object is constructed
         fn constructed(&self) {
             self.parent_constructed();
+            self.obj().setup_actions();
             self.obj().setup_callbacks();
         }
     }
@@ -76,6 +78,15 @@ glib::wrapper! {
 impl Window {
     pub fn new(app: &adw::Application) -> Self {
         Object::builder().property("application", app).build()
+    }
+
+    fn setup_actions(&self) {
+        let action = gio::ActionEntryBuilder::new("about")
+            .activate(|window: &Self, _, _| {
+                create_about_dialog().present(Some(window));
+            })
+            .build();
+        self.add_action_entries([action]);
     }
 
     fn setup_callbacks(&self) {
