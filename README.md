@@ -78,3 +78,4 @@ cargo test -- --nocapture
     - [ ] Multi-select in the column view
     - [ ] Choose which field to update
 - [ ] Find a way to make it more fun
+- [ ] Deploy through aws or azure
