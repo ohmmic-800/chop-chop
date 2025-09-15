@@ -38,6 +38,7 @@ mod imp {
     impl ObjectImpl for SolverOverlay {
         // Called when the object is constructed
         fn constructed(&self) {
+            self.parent_constructed();
             self.obj().setup_callbacks();
         }
     }

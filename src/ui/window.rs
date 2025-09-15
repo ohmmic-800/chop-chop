@@ -140,12 +140,10 @@ impl Window {
             async move {
                 while let Ok(progress) = progress_receiver.recv().await {
                     overlay.update_progress(progress);
-                    if progress >= 1.0 {
-                        overlay.force_close();
-                    }
                 }
                 let results = result_receiver.recv().await.expect("Channel closed");
                 window.imp().solver_pane.update_results(results);
+                overlay.force_close();
             }
         ));
     }
