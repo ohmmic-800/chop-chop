@@ -45,7 +45,7 @@ impl Solver for OneDSolver {
                 .push((part.length.clone(), part.quantity.clone()));
         }
 
-        // TODO: Follow process for each material type. Assume 'list' of supplies and parts separated by material.
+        let mut possible_cuts: Vec<Vec<Fraction>> = Vec::new();
         for material in parts_by_material.keys() {
             // Make set of cut length needed(for 'this' material).
             let mut cuts_set: HashSet<Fraction> = HashSet::new();
@@ -66,7 +66,6 @@ impl Solver for OneDSolver {
             let mut pieces: Vec<Fraction> = pieces_set.iter().cloned().collect();
             pieces.sort();
             // Compute all possible cut possibilities for each supply.
-            let mut possible_cuts: Vec<Vec<Fraction>> = Vec::new();
             for piece in pieces {
                 generate_combinations(&mut cuts, piece, 0, &mut Vec::new(), &mut possible_cuts);
             }
@@ -86,4 +85,18 @@ fn generate_combinations(
     current: &mut Vec<Fraction>,
     results: &mut Vec<Vec<Fraction>>,
 ) {
+    let mut sum: Fraction = Fraction::new(0u64, 1u64);
+    for cut in current.iter() {
+        sum.add_assign(cut.clone());
+    }
+    if (sum > piece) {
+        return;
+    }
+    results.push(current.clone());
+
+    for i in start_index..cuts.len() {
+        let mut clone = current.clone();
+        clone.push(cuts.get(i).unwrap().clone());
+        generate_combinations(cuts, piece, i, &mut clone, results);
+    }
 }
