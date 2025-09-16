@@ -1,4 +1,5 @@
 pub mod naive_solver;
+pub mod oned_solver;
 
 use async_channel::Sender;
 use fraction::Decimal;
