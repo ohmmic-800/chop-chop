@@ -39,24 +39,30 @@ impl Solver for OneDSolver {
         }
 
         for material in parts_by_material.keys() {
-            // Make set of parts needed for the current material.
-            let mut cuts_set: HashSet<Part> = HashSet::new();
+            // Make list of parts needed for the current material.
+            let mut cuts_set: Vec<Part> = Vec::new();
             if let Some(parts) = parts_by_material.get(material) {
                 for part in parts {
-                    cuts_set.insert(part.clone());
+                    cuts_set.push(part.clone());
                 }
             }
-            // Make set of supply lengths available for current material..
-            let mut supply_set: HashSet<Supply> = HashSet::new();
+            // Make list of supplies available for current material.
+            let mut supply_set: Vec<Supply> = Vec::new();
             if let Some(supplies) = supplies_by_material.get(material) {
                 for supply in supplies {
-                    supply_set.insert(supply.0);
+                    supply_set.push(supply.clone());
                 }
             }
             let mut possible_cuts: Vec<(Supply, Vec<Fraction>)> = Vec::new(); // Vec< Thing to cut <How it will be cut>>.
             // Compute all possible cut possibilities for each supply.
-            for piece in pieces {
-                generate_combinations(&mut cuts, piece, 0, &mut Vec::new(), &mut possible_cuts);
+            for piece in supply_set {
+                generate_combinations(
+                    &mut cuts_set,
+                    &piece,
+                    0,
+                    &mut (piece, Vec::new()),
+                    &mut possible_cuts,
+                );
             }
             // TODO: Define constraints and plug into linear solver.
         }
@@ -76,18 +82,18 @@ impl Solver for OneDSolver {
 
 // Generates possible cut combinations for a single piece.
 fn generate_combinations(
-    cuts: &Vec<Fraction>,
+    cuts: &Vec<Part>,
     piece: &Supply,
     start_index: usize,
     current: &mut (Supply, Vec<Fraction>),
     results: &mut Vec<(Supply, Vec<Fraction>)>,
 ) {
-    // Check if sum of input cuts are longer than provided supply. 
+    // Check if sum of input cuts are longer than provided supply.
     let mut sum: Fraction = Fraction::new(0u64, 1u64);
     for cut in current.1.iter() {
         sum.add_assign(cut.clone());
     }
-    if (sum > piece) {
+    if sum > piece.length {
         return;
     }
     results.push(current.clone());
@@ -95,7 +101,7 @@ fn generate_combinations(
     generate_combinations(cuts, piece, start_index, current, results);
     for i in start_index..cuts.len() {
         let mut clone = current.clone();
-        clone.push(cuts.get(i).unwrap().clone());
+        clone.1.push((cuts.get(i).unwrap().length.clone()));
         generate_combinations(cuts, piece, i, &mut clone, results);
     }
 }

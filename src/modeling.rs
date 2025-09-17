@@ -17,6 +17,17 @@ pub struct Supply {
     pub max_quantity: i64,
 }
 
+impl Clone for Supply {
+    fn clone(&self) -> Self {
+        Supply {
+            material: self.material.clone(),
+            length: self.length.clone(), // Fraction must implement Clone
+            price: self.price.clone(),
+            max_quantity: self.max_quantity,
+        }
+    }
+}
+
 /// Represents a desired part
 ///
 /// Assumed 1D for now
@@ -25,6 +36,16 @@ pub struct Part {
     pub material: String,
     pub length: Fraction,
     pub quantity: i64,
+}
+
+impl Clone for Part {
+    fn clone(&self) -> Self {
+        Part {
+            material: self.material.clone(),
+            length: self.length.clone(), // Fraction must implement Clone
+            quantity: self.quantity,
+        }
+    }
 }
 
 /// Represents a set of of cuts to perform on an object
