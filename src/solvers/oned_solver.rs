@@ -18,53 +18,42 @@ impl Solver for OneDSolver {
         parts: &Vec<Part>,
         progress_sender: Option<Sender<f64>>,
         result_sender: Option<Sender<Result<Solution, String>>>,
-    ) {
-        // -> Result<Solution, String> {
-
-        //Break up supplies and parts by material type.
-        let mut supplies_by_material: HashMap<String, Vec<(Fraction, Decimal, i64)>> =
-            HashMap::new();
-        let mut parts_by_material: HashMap<String, Vec<(Fraction, i64)>> = HashMap::new();
+    ) -> Result<Solution, String> {
+        // Break up supplies and parts by material type.
+        let mut supplies_by_material: HashMap<String, Vec<Supply>> = HashMap::new();
+        let mut parts_by_material: HashMap<String, Vec<Part>> = HashMap::new();
 
         for supply in supplies {
             let material = &supply.material;
             supplies_by_material
                 .entry(material.clone()) // clone the key if needed
                 .or_insert_with(Vec::new) // insert empty vector if key doesn't exist
-                .push((
-                    supply.length.clone(),
-                    supply.price.clone(),
-                    supply.max_quantity.clone(),
-                ));
+                .push(supply.clone());
         }
         for part in parts {
             let material = &part.material;
             parts_by_material
                 .entry(material.clone())
                 .or_insert_with(Vec::new)
-                .push((part.length.clone(), part.quantity.clone()));
+                .push(part.clone());
         }
 
         for material in parts_by_material.keys() {
-            // Make set of cut length needed(for 'this' material).
-            let mut cuts_set: HashSet<Fraction> = HashSet::new();
+            // Make set of parts needed for the current material.
+            let mut cuts_set: HashSet<Part> = HashSet::new();
             if let Some(parts) = parts_by_material.get(material) {
                 for part in parts {
-                    cuts_set.insert(part.0);
+                    cuts_set.insert(part.clone());
                 }
             }
-            let mut cuts: Vec<Fraction> = cuts_set.iter().cloned().collect();
-            cuts.sort();
-            // Make set of supply lengths available.
-            let mut pieces_set: HashSet<Fraction> = HashSet::new();
+            // Make set of supply lengths available for current material..
+            let mut supply_set: HashSet<Supply> = HashSet::new();
             if let Some(supplies) = supplies_by_material.get(material) {
                 for supply in supplies {
-                    pieces_set.insert(supply.0);
+                    supply_set.insert(supply.0);
                 }
             }
-            let mut pieces: Vec<Fraction> = pieces_set.iter().cloned().collect();
-            pieces.sort();
-            let mut possible_cuts: Vec<Vec<Fraction>> = Vec::new();
+            let mut possible_cuts: Vec<(Supply, Vec<Fraction>)> = Vec::new(); // Vec< Thing to cut <How it will be cut>>.
             // Compute all possible cut possibilities for each supply.
             for piece in pieces {
                 generate_combinations(&mut cuts, piece, 0, &mut Vec::new(), &mut possible_cuts);
@@ -73,19 +62,29 @@ impl Solver for OneDSolver {
         }
 
         // TODO: Convert output into cut list.
+
+        // TODO: Change to return actual value.
+        let solution = Ok(Solution {
+            cut_lists,
+            supply_consumption,
+            total_price,
+        });
+        self.send_final_result(solution.clone(), progress_sender, result_sender);
+        solution
     }
 }
 
 // Generates possible cut combinations for a single piece.
 fn generate_combinations(
     cuts: &Vec<Fraction>,
-    piece: Fraction,
+    piece: &Supply,
     start_index: usize,
-    current: &mut Vec<Fraction>,
-    results: &mut Vec<Vec<Fraction>>,
+    current: &mut (Supply, Vec<Fraction>),
+    results: &mut Vec<(Supply, Vec<Fraction>)>,
 ) {
+    // Check if sum of input cuts are longer than provided supply. 
     let mut sum: Fraction = Fraction::new(0u64, 1u64);
-    for cut in current.iter() {
+    for cut in current.1.iter() {
         sum.add_assign(cut.clone());
     }
     if (sum > piece) {
