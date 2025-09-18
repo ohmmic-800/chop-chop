@@ -1,4 +1,5 @@
 use fraction::{Decimal, Fraction};
+use good_lp::*;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::hash::Hash;
@@ -65,6 +66,43 @@ impl Solver for OneDSolver {
                 );
             }
             // TODO: Define constraints and plug into linear solver.
+            // TODO: Define price constraint.
+            let solver = default_solver();
+            let mut problem = Problem::new(solver).minimise(0.0);
+
+            // Create continuous variables
+            let mut vars = Vec::new();
+            for _ in &possible_cuts {
+                vars.push(problem.add_variable(variable().min(0.0))); // continuous
+            }
+
+            // Objective: total cost
+            let mut objective = 0.0;
+            for (i, (supply, _pattern)) in possible_cuts.iter().enumerate() {
+                objective += supply.price * vars[i];
+            }
+            problem.set_objective(objective);
+
+            // Constraint: each part must be satisfied
+            for part in &cuts_set {
+                let mut lhs: Expression = 0.0;
+                for (i, (_supply, pattern)) in possible_cuts.iter().enumerate() {
+                    let count = pattern
+                        .iter()
+                        .filter(|&&length| length == part.length)
+                        .count() as f64;
+                    lhs += count * vars[i];
+                }
+                problem.add_constraint(lhs >= part.quantity as f64);
+            }
+
+            // Constraint: do not exceed supply quantity
+            for (i, (supply, _pattern)) in possible_cuts.iter().enumerate() {
+                problem.add_constraint(vars[i] <= supply.max_quantity);
+            }
+
+            // Solve
+            let solution = problem.solve().unwrap();
         }
 
         // TODO: Convert output into cut list.
