@@ -1,6 +1,8 @@
 use fraction::ToPrimitive;
 use fraction::{Decimal, Fraction};
+use good_lp::Solution as GoodLpSolution;
 use good_lp::*;
+
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::hash::Hash;
@@ -84,18 +86,19 @@ impl Solver for OneDSolver {
             }
         }
 
-        let solution: Solution = model.solve()?;
+        let solver_solution = model.solve().map_err(|e| e.to_string())?;
 
-        println!("Optimal cost = {}", solution.eval(&model.objective()));
+        // Extract u values
+        let u_values: Vec<f64> = u.iter().map(|var| solver_solution.value(*var)).collect();
+
+        // Extract x values
+        let mut x_values: Vec<Vec<f64>> = Vec::with_capacity(n);
         for i in 0..n {
-            if solution.value(u[i]) > 0.5 {
-                println!("Supply {} is used", i);
-                for j in 0..m {
-                    if solution.value(x[i][j]) > 0.5 {
-                        println!("  Part {} assigned", j);
-                    }
-                }
+            let mut row = Vec::with_capacity(m);
+            for j in 0..m {
+                row.push(solver_solution.value(x[i][j]));
             }
+            x_values.push(row);
         }
 
         Ok(())
