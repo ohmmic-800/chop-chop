@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="ChopChopWindow" parent="AdwApplicationWindow">
+    <property name="default-width">1100</property>
+    <property name="default-height">800</property>
+    <property name="title">Chop-Chop</property>
+    <child>
+      <object class="GtkBox" id="content">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="AdwHeaderBar" id="header">
+            <property name="title-widget">
+              <object class="AdwViewSwitcher">
+                <property name="stack">stack</property>
+                <property name="policy">wide</property>
+              </object>
+            </property>
+            <child type="start">
+              <object class="GtkLabel" id="filename_label">
+                <property name="margin-start">8</property>
+                <property name="label">Untitled</property>
+                <property name="ellipsize">PANGO_ELLIPSIZE_MIDDLE</property>
+                <property name="max-width-chars">20</property>
+              </object>
+            </child>
+            <child type="start">
+              <object class="GtkLabel" id="unsaved_indicator">
+                <property name="margin-start">8</property>
+                <property name="label">•</property>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkMenuButton" id="menu_button">
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text">Main Menu</property>
+                <property name="primary">true</property>
+                <property name="menu-model">
+                  <menu id="primary_menu">
+                    <section>
+                      <item>
+                        <attribute name="label">_New</attribute>
+                        <attribute name="action">app.new</attribute>
+                      </item>
+                      <item>
+                        <attribute name="label">_Open</attribute>
+                        <attribute name="action">win.open</attribute>
+                      </item>
+                      <item>
+                        <attribute name="label">_Save</attribute>
+                        <attribute name="action">win.save</attribute>
+                      </item>
+                      <item>
+                        <attribute name="label">Save _As</attribute>
+                        <attribute name="action">win.save-as</attribute>
+                      </item>
+                    </section>
+                    <section>
+                      <item>
+                        <attribute name="label">_Print</attribute>
+                        <attribute name="action">win.print</attribute>
+                      </item>
+                    </section>
+                    <section>
+                      <item>
+                        <attribute name="label">_Preferences</attribute>
+                        <attribute name="action">win.preferences</attribute>
+                      </item>
+                      <item>
+                        <attribute name="label">_Keyboard Shortcuts</attribute>
+                        <attribute name="action">win.show-help-overlay</attribute>
+                      </item>
+                      <item>
+                        <attribute name="label">_About Chop-Chop</attribute>
+                        <attribute name="action">win.about</attribute>
+                      </item>
+                    </section>
+                  </menu>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwViewStack" id="stack">
+            <child>
+              <object class="AdwViewStackPage">
+                <property name="name">supplies</property>
+                <property name="title">Supplies</property>
+                <property name="icon-name">build-symbolic</property>
+                <property name="child">
+                  <object class="ChopChopEntryPane" id="supplies_pane">
+                    <property name="entry-descriptor">Supply</property>
+                    <property name="allow-price">true</property>
+                    <property name="require-quantity">false</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwViewStackPage">
+                <property name="name">parts</property>
+                <property name="title">Parts</property>
+                <property name="icon-name">build-alt-symbolic</property>
+                <property name="child">
+                  <object class="ChopChopEntryPane" id="parts_pane">
+                    <property name="entry-descriptor">Part</property>
+                    <property name="allow-price">false</property>
+                    <property name="require-quantity">true</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwViewStackPage">
+                <property name="name">solver</property>
+                <property name="title">Solver</property>
+                <property name="icon-name">running-symbolic</property>
+                <property name="child">
+                  <object class="ChopChopSolverPane" id="solver_pane"></object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

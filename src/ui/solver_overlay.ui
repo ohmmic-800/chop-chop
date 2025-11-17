@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="ChopChopSolverOverlay" parent="AdwDialog">
+    <property name="can-close">false</property>
+    <property name="content-width">400</property>
+    <property name="content-height">250</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">16</property>
+        <property name="margin-start">16</property>
+        <property name="margin-end">16</property>
+        <property name="margin-top">16</property>
+        <property name="margin-bottom">16</property>
+        <child>
+          <object class="AdwStatusPage">
+            <property name="title">Running solver...</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="progress_bar">
+            <property name="margin-start">32</property>
+            <property name="margin-end">32</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="sub_progress_bar">
+            <property name="margin-start">32</property>
+            <property name="margin-end">32</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="cancel_button">
+            <property name="label">Cancel</property>
+            <property name="margin-start">32</property>
+            <property name="margin-end">32</property>
+            <style>
+              <class name="pill" />
+              <class name="destructive-action" />
+            </style>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

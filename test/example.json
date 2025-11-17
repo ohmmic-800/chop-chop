@@ -1,0 +1,402 @@
+[
+  [
+    {
+      "dimension": 0,
+      "name": "Home Depot",
+      "material": "2x4",
+      "price": "3.50",
+      "quantity": "",
+      "length_unit": 0,
+      "major_length": "12",
+      "minor_length": "",
+      "width_unit": 0,
+      "major_width": "",
+      "minor_width": ""
+    },
+    {
+      "dimension": 0,
+      "name": "Scrap",
+      "material": "2x4",
+      "price": "",
+      "quantity": "10",
+      "length_unit": 0,
+      "major_length": "4",
+      "minor_length": "",
+      "width_unit": 0,
+      "major_width": "",
+      "minor_width": ""
+    },
+    {
+      "dimension": 0,
+      "name": "Home Depot",
+      "material": "2x2",
+      "price": "2.50",
+      "quantity": "",
+      "length_unit": 0,
+      "major_length": "8",
+      "minor_length": "",
+      "width_unit": 0,
+      "major_width": "",
+      "minor_width": ""
+    },
+    {
+      "dimension": 0,
+      "name": "Pallete",
+      "material": "2x4",
+      "price": "1",
+      "quantity": "5",
+      "length_unit": 0,
+      "major_length": "8",
+      "minor_length": "1 7/8",
+      "width_unit": 0,
+      "major_width": "",
+      "minor_width": ""
+    }
+  ],
+  [
+    {
+      "dimension": 0,
+      "name": "8-ft segments",
+      "material": "2x4",
+      "price": "",
+      "quantity": "8",
+      "length_unit": 0,
+      "major_length": "8",
+      "minor_length": "",
+      "width_unit": 0,
+      "major_width": "",
+      "minor_width": ""
+    },
+    {
+      "dimension": 0,
+      "name": "6-ft segments",
+      "material": "2x4",
+      "price": "",
+      "quantity": "12",
+      "length_unit": 0,
+      "major_length": "6",
+      "minor_length": "",
+      "width_unit": 0,
+      "major_width": "",
+      "minor_width": ""
+    },
+    {
+      "dimension": 0,
+      "name": "3-ft segments",
+      "material": "2x2",
+      "price": "",
+      "quantity": "15",
+      "length_unit": 0,
+      "major_length": "3",
+      "minor_length": "",
+      "width_unit": 0,
+      "major_width": "",
+      "minor_width": ""
+    }
+  ],
+  {
+    "Ok": [
+      [
+        {
+          "name": "2x4",
+          "dimension": "OneD"
+        },
+        {
+          "supplies": [
+            {
+              "name": "Home Depot",
+              "length": {
+                "unit": "FeetInches",
+                "major": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      12,
+                      1
+                    ]
+                  ]
+                },
+                "minor": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "price": [
+                {
+                  "Rational": [
+                    "Plus",
+                    [
+                      7,
+                      2
+                    ]
+                  ]
+                },
+                2
+              ],
+              "max_quantity": -1
+            },
+            {
+              "name": "Scrap",
+              "length": {
+                "unit": "FeetInches",
+                "major": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      4,
+                      1
+                    ]
+                  ]
+                },
+                "minor": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "price": [
+                {
+                  "Rational": [
+                    "Plus",
+                    [
+                      0,
+                      1
+                    ]
+                  ]
+                },
+                0
+              ],
+              "max_quantity": 10
+            },
+            {
+              "name": "Pallete",
+              "length": {
+                "unit": "FeetInches",
+                "major": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      8,
+                      1
+                    ]
+                  ]
+                },
+                "minor": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      15,
+                      8
+                    ]
+                  ]
+                }
+              },
+              "price": [
+                {
+                  "Rational": [
+                    "Plus",
+                    [
+                      1,
+                      1
+                    ]
+                  ]
+                },
+                0
+              ],
+              "max_quantity": 5
+            }
+          ],
+          "parts": [
+            {
+              "name": "8-ft segments",
+              "length": {
+                "unit": "FeetInches",
+                "major": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      3,
+                      1
+                    ]
+                  ]
+                },
+                "minor": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "quantity": 8
+            },
+            {
+              "name": "6-ft segments",
+              "length": {
+                "unit": "FeetInches",
+                "major": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      6,
+                      1
+                    ]
+                  ]
+                },
+                "minor": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "quantity": 12
+            }
+          ],
+          "cut_lists": [
+            {
+              "supply_index": 2,
+              "part_indices": [
+                1
+              ],
+              "quantity": 5
+            },
+            {
+              "supply_index": 0,
+              "part_indices": [
+                1,
+                1
+              ],
+              "quantity": 3
+            },
+            {
+              "supply_index": 0,
+              "part_indices": [
+                1
+              ],
+              "quantity": 1
+            },
+            {
+              "supply_index": 1,
+              "part_indices": [
+                0
+              ],
+              "quantity": 8
+            }
+          ]
+        }
+      ],
+      [
+        {
+          "name": "2x2",
+          "dimension": "OneD"
+        },
+        {
+          "supplies": [
+            {
+              "name": "Home Depot",
+              "length": {
+                "unit": "FeetInches",
+                "major": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      8,
+                      1
+                    ]
+                  ]
+                },
+                "minor": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "price": [
+                {
+                  "Rational": [
+                    "Plus",
+                    [
+                      5,
+                      2
+                    ]
+                  ]
+                },
+                2
+              ],
+              "max_quantity": -1
+            }
+          ],
+          "parts": [
+            {
+              "name": "3-ft segments",
+              "length": {
+                "unit": "FeetInches",
+                "major": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      3,
+                      1
+                    ]
+                  ]
+                },
+                "minor": {
+                  "Rational": [
+                    "Plus",
+                    [
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "quantity": 15
+            }
+          ],
+          "cut_lists": [
+            {
+              "supply_index": 0,
+              "part_indices": [
+                0
+              ],
+              "quantity": 1
+            },
+            {
+              "supply_index": 0,
+              "part_indices": [
+                0,
+                0
+              ],
+              "quantity": 7
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  [
+    0,
+    0,
+    "",
+    ""
+  ]
+]

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="ChopChopSolverPane" parent="GtkBox">
+    <child>
+      <object class="AdwOverlaySplitView">
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+        <property name="sidebar_width_fraction">0.35</property>
+        <property name="min_sidebar_width">200</property>
+        <property name="max_sidebar_width">350</property>
+        <property name="sidebar">
+          <object class="GtkCenterBox">
+            <property name="orientation">vertical</property>
+            <child type="start">
+              <object class="GtkScrolledWindow">
+                <property name="vexpand">true</property>
+                <style>
+                  <class name="undershoot-top" />
+                  <class name="undershoot-bottom" />
+                </style>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">16</property>
+                    <property name="margin-start">16</property>
+                    <property name="margin-end">16</property>
+                    <property name="margin-top">16</property>
+                    <property name="margin-bottom">16</property>
+                    <child>
+                      <object class="AdwPreferencesGroup">
+                        <property name="title">Solver</property>
+                        <child>
+                          <object class="AdwComboRow" id="solver_field">
+                            <property name="title">Method</property>
+                            <property name="model">
+                              <object class="GtkStringList">
+                                <items>
+                                  <item>Naive</item>
+                                </items>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwPreferencesGroup">
+                        <property name="title">Blade Width</property>
+                        <child>
+                          <object class="ChopChopUnitRow" id="blade_unit_field"></object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow" id="major_blade_field">
+                            <property name="title">Feet</property>
+                            <property name="max-length">16</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow" id="minor_blade_field">
+                            <property name="title">Inches</property>
+                            <property name="max-length">16</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkCenterBox">
+                <style>
+                  <class name="side-toolbar" />
+                </style>
+                <child type="center">
+                  <object class="GtkBox">
+                    <property name="margin-start">24</property>
+                    <property name="margin-end">24</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="spacing">24</property>
+                    <property name="homogeneous">true</property>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">Solve</property>
+                        <property name="action-name">win.solve</property>
+                        <property name="tooltip-text">Run the solver</property>
+                        <property name="height-request">40</property>
+                        <property name="width-request">96</property>
+                        <style>
+                          <class name="suggested-action" />
+                        </style>
+                      </object>
+                    </child>
+                    <child type="start">
+                      <object class="GtkButton" id="clear_button">
+                        <property name="label">Clear</property>
+                        <property name="action-name">win.clear</property>
+                        <property name="tooltip-text">Clear solver results</property>
+                        <property name="height-request">40</property>
+                        <property name="width-request">96</property>
+                        <style>
+                          <class name="destructive-action" />
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+        <property name="content">
+          <object class="GtkStack" id="content_stack">
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">nonempty</property>
+                <property name="child">
+                  <object class="GtkScrolledWindow">
+                    <child>
+                      <object class="GtkBox" id="display_area">
+                        <property name="orientation">vertical</property>
+                        <property name="margin-start">16</property>
+                        <property name="margin-end">16</property>
+                        <property name="margin-top">16</property>
+                        <property name="margin-bottom">16</property>
+                        <property name="spacing">16</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">placeholder</property>
+                <property name="child">
+                  <object class="AdwStatusPage">
+                    <property name="icon-name">info-outline-symbolic</property>
+                    <property name="title">No Results</property>
+                    <property name="description">Add supplies and parts, then press the solve button to generate results.</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schemalist>
+  <schema id="com.ohmm-software.Chop-Chop" path="/com/ohmm-software/Chop-Chop/">
+    <key name="exit-prompt" type="b">
+      <default>false</default>
+      <summary>Prompt before exiting with unsaved changes</summary>
+    </key>
+    <key name="reopen-last" type="b">
+      <default>false</default>
+      <summary>Reopen the last project when restarting the app</summary>
+    </key>
+    <key name="last-project" type="s">
+      <default>""</default>
+      <summary>The path of the most recent project</summary>
+    </key>
+    <key name="match-scale" type="b">
+      <default>false</default>
+      <summary>Display all diagrams at the same scale</summary>
+    </key>
+    <key name="display-font" type="s">
+      <default>"Adwaita Sans Regular 14"</default>
+      <summary>The font to use for result display</summary>
+    </key>
+    <key name="print-font" type="s">
+      <default>"Adwaita Sans Regular 14"</default>
+      <summary>The font to use for printing</summary>
+    </key>
+    <key name="size-format" type="u">
+      <default>0</default>
+      <summary>How to display sizes</summary>
+    </key>
+    <key name="size-precision" type="u">
+      <default>5</default>
+      <summary>The maximum number of decimal places to display for sizes</summary>
+    </key>
+    <key name="price-precision" type="u">
+      <default>2</default>
+      <summary>The number of decimal places to display for prices</summary>
+    </key>
+    <key name="deselect-add" type="b">
+      <default>false</default>
+      <summary>Clear selection (and fields) after adding a new item</summary>
+    </key>
+    <key name="default-unit" type="u">
+      <default>0</default>
+      <summary>The default size unit when nothing is selected</summary>
+    </key>
+    <key name="default-material-1d" type="s">
+      <default>"Default 1D"</default>
+      <summary>The default 1D material name when nothing is selected</summary>
+    </key>
+    <key name="default-material-2d" type="s">
+      <default>"Default 2D"</default>
+      <summary>The default 2D material name when nothing is selected</summary>
+    </key>
+  </schema>
+</schemalist>

@@ -1,0 +1,39 @@
+.invalid-entry {
+    /* Can also try --warning-color here */
+    color: var(--error-color);
+    outline-color: var(--error-color);
+}
+
+.side-toolbar {
+    background-color: var(--view-bg-color);
+    color: var(--view-fg-color);
+    border-right: 1px solid var(--sidebar-border-color);
+}
+
+.display-header-1 {
+    font-size: x-large;
+    font-weight: bold;
+}
+
+.display-header-2 {
+    font-size: large;
+    font-weight: bold;
+}
+
+.display-header-3 {
+    font-size: medium;
+    font-weight: bold;
+}
+
+.display-paragraph {
+    font-size: medium;
+}
+
+expander-widget box title {
+    background-color: var(--sidebar-bg-color);
+}
+
+expander-widget box title expander {
+    margin-left: 4px;
+    margin-right: 4px;
+}

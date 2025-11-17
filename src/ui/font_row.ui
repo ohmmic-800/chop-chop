@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="ChopChopFontEntry" parent="AdwActionRow">
+    <child>
+      <object class="GtkFontDialogButton" id="font_button">
+        <property name="use-font">true</property>
+        <property name="margin-top">8</property>
+        <property name="margin-bottom">8</property>
+        <property name="dialog">
+          <object class="GtkFontDialog"></object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

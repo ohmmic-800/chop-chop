@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="ChopChopUnitRow" parent="AdwComboRow">
+    <property name="title">Unit</property>
+    <property name="model">
+      <object class="GtkStringList">
+        <items>
+          <item>Feet, inches</item>
+          <item>Inches</item>
+          <item>Meters</item>
+          <item>Centimeters</item>
+        </items>
+      </object>
+    </property>
+  </template>
+</interface>

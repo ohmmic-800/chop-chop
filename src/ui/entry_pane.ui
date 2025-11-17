@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="ChopChopEntryPane" parent="GtkBox">
+    <child>
+      <object class="AdwOverlaySplitView">
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+        <property name="sidebar_width_fraction">0.35</property>
+        <property name="min_sidebar_width">200</property>
+        <property name="max_sidebar_width">350</property>
+        <property name="sidebar">
+          <object class="GtkCenterBox">
+            <property name="orientation">vertical</property>
+            <child type="start">
+              <object class="GtkScrolledWindow">
+                <property name="vexpand">true</property>
+                <style>
+                  <class name="undershoot-top" />
+                  <class name="undershoot-bottom" />
+                </style>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">16</property>
+                    <property name="margin-start">16</property>
+                    <property name="margin-end">16</property>
+                    <property name="margin-top">16</property>
+                    <property name="margin-bottom">16</property>
+                    <child>
+                      <object class="AdwPreferencesGroup">
+                        <property name="title">Material</property>
+                        <child>
+                          <object class="AdwActionRow">
+                            <property name="title">Type</property>
+                            <child>
+                              <object class="AdwToggleGroup" id="dimension_field">
+                                <property name="margin-top">8</property>
+                                <property name="margin-bottom">8</property>
+                                <property name="active-name">1d</property>
+                                <property name="homogeneous">true</property>
+                                <property name="width-request">128</property>
+                                <child>
+                                  <object class="AdwToggle">
+                                    <property name="label">1D</property>
+                                    <property name="name">1d</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="AdwToggle">
+                                    <property name="label">2D</property>
+                                    <property name="name">2d</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow" id="material_field">
+                            <property name="title">Name</property>
+                            <property name="max-length">64</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwPreferencesGroup" id="properties_group">
+                        <property name="title">Properties</property>
+                        <child>
+                          <object class="AdwEntryRow" id="name_field">
+                            <property name="title">Name</property>
+                            <property name="max-length">64</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow" id="price_field">
+                            <property name="title">Price</property>
+                            <property name="max-length">16</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow" id="quantity_field">
+                            <property name="title">Quantity</property>
+                            <property name="max-length">16</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwPreferencesGroup">
+                        <property name="title">Length</property>
+                        <child>
+                          <object class="ChopChopUnitRow" id="length_unit_field"></object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow" id="major_length_field">
+                            <property name="title">Feet</property>
+                            <property name="max-length">16</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow" id="minor_length_field">
+                            <property name="title">Inches</property>
+                            <property name="max-length">16</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwPreferencesGroup" id="width_group">
+                        <property name="title">Width</property>
+                        <child>
+                          <object class="ChopChopUnitRow" id="width_unit_field"></object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow" id="major_width_field">
+                            <property name="title">Feet</property>
+                            <property name="max-length">16</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwEntryRow" id="minor_width_field">
+                            <property name="title">Inches</property>
+                            <property name="max-length">16</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkCenterBox">
+                <style>
+                  <class name="side-toolbar" />
+                </style>
+                <child type="center">
+                  <object class="GtkBox">
+                    <property name="margin-start">24</property>
+                    <property name="margin-end">24</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="spacing">24</property>
+                    <property name="homogeneous">true</property>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">Add</property>
+                        <property name="action-name">pane.add</property>
+                        <property name="tooltip-text">Add a new row</property>
+                        <property name="height-request">40</property>
+                        <property name="width-request">96</property>
+                        <style>
+                          <class name="suggested-action" />
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">Delete</property>
+                        <property name="action-name">pane.delete</property>
+                        <property name="tooltip-text">Delete the selected row</property>
+                        <property name="height-request">40</property>
+                        <property name="width-request">96</property>
+                        <style>
+                          <class name="destructive-action" />
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+        <property name="content">
+          <object class="GtkStack" id="content_stack">
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">nonempty</property>
+                <property name="child">
+                  <object class="GtkScrolledWindow">
+                    <property name="width_request">350</property>
+                    <child>
+                      <object class="GtkColumnView" id="column_view">
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Material</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Name</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Price</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Quantity</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Length</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColumnViewColumn">
+                            <property name="title">Width</property>
+                            <property name="expand">true</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">placeholder</property>
+                <property name="child">
+                  <object class="AdwStatusPage">
+                    <property name="icon-name">info-outline-symbolic</property>
+                    <property name="title">Nothing Added</property>
+                    <property name="description">Add entries using the sidebar.</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

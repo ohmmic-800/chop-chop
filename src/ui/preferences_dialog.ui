@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="ChopChopPreferencesDialog" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage">
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title">General</property>
+            <child>
+              <object class="AdwSwitchRow" id="exit_prompt_entry">
+                <property name="title">Exit Prompt</property>
+                <property name="subtitle">Prompt before exiting with unsaved changes</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="reopen_last_entry">
+                <property name="title">Reopen Last</property>
+                <property name="subtitle">Reopen the last project when restarting the app</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Display</property>
+            <child>
+              <object class="AdwSwitchRow" id="match_scale_entry">
+                <property name="title">Match Diagram Scale</property>
+                <property name="subtitle">Display all diagrams at the same scale</property>
+              </object>
+            </child>
+            <child>
+              <object class="ChopChopFontEntry" id="display_font_entry">
+                <property name="title">Display Font</property>
+                <property name="subtitle">The font to use for result display</property>
+              </object>
+            </child>
+            <child>
+              <object class="ChopChopFontEntry" id="print_font_entry">
+                <property name="title">Print Font</property>
+                <property name="subtitle">The font to use for printing</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Units and Formatting</property>
+            <child>
+              <object class="AdwComboRow" id="size_format_entry">
+                <property name="title">Size Format</property>
+                <property name="subtitle">How sizes appear in the table</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item>Decimal</item>
+                      <item>Mixed</item>
+                      <item>Fraction</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSpinRow" id="size_precision_entry">
+                <property name="title">Size Precision</property>
+                <property name="subtitle">The maximum number of decimal places to display for sizes</property>
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">0</property>
+                    <property name="upper">20</property>
+                    <property name="step-increment">1</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSpinRow" id="price_precision_entry">
+                <property name="title">Price Precision</property>
+                <property name="subtitle">The number of decimal places to display for prices</property>
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">0</property>
+                    <property name="upper">20</property>
+                    <property name="step-increment">1</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Editing</property>
+            <child>
+              <object class="AdwSwitchRow" id="deselect_add_entry">
+                <property name="title">Deselect After Add</property>
+                <property name="subtitle">Clear selection (and fields) after adding a new item</property>
+              </object>
+            </child>
+            <child>
+              <object class="ChopChopUnitRow" id="default_unit_entry">
+                <property name="title">Default Unit</property>
+                <property name="subtitle">The default size unit when nothing is selected</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="default_material_1d_entry">
+                <property name="title">Default 1D Material</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="default_material_2d_entry">
+                <property name="title">Default 2D Material</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
