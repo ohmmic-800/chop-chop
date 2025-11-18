@@ -1,15 +1,17 @@
+# Chop-Chop
+
 ## Project Setup
 
 [Install rustup](https://rustup.rs/) and set up a standard Rust development environment.
 
 Follow the instructions [here](https://gtk-rs.org/gtk4-rs/git/book/installation.html) and [here](https://gtk-rs.org/gtk4-rs/git/book/libadwaita.html) to install other system dependencies (a C compiler, GTK4 development libraries, and Libadwaita development libraries).
 
-If using Visual Studio Code, install the [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension. See the VSCode [Rust language page](https://code.visualstudio.com/docs/languages/rust).
-
 Install settings gschema by running the following from the top-level repo directory:
-```
+
+```bash
 ./install_schema.sh
 ```
+
 Run this command after making any edits to `gschema.xml`.
 
 ctrl+alt for inlay hints
@@ -17,7 +19,8 @@ ctrl+alt for inlay hints
 ## Building
 
 The following command will build and run the application:
-```
+
+```bash
 cargo run
 ```
 
@@ -28,11 +31,14 @@ Format code using `rustfmt` (default settings). Limit lines to 100 characters.
 ## Tests
 
 To run unit tests:
-```
+
+```bash
 cargo test
 ```
+
 To run unit tests and show printed output:
-```
+
+```bash
 cargo test -- --nocapture
 ```
 
@@ -47,14 +53,14 @@ cargo test -- --nocapture
 
 - [x] Split `window.rs` into multiple files (one per pane)
 - [x] Finish editing UI
-    - [x] Update entry widgets when selecting a new row
-    - [x] The "update" button saves changes to the selected row
-    - [x] The "add new" button saves changes to a new row
-    - [x] Add "delete" button
-    - [x] Discard pending changes when a new row is selected
+  - [x] Update entry widgets when selecting a new row
+  - [x] The "update" button saves changes to the selected row
+  - [x] The "add new" button saves changes to a new row
+  - [x] Add "delete" button
+  - [x] Discard pending changes when a new row is selected
 - [x] Validate entry fields
-    - [x] Highlight invalid entries with red or yellow border
-    - [x] Don't allow saving changes if there is an invalid entry
+  - [x] Highlight invalid entries with red or yellow border
+  - [x] Don't allow saving changes if there is an invalid entry
 - [x] Show a graphic/instructions if there are no rows
 - [x] Parse fractions in length units
 - [x] Use a split field for ft+in
@@ -104,8 +110,8 @@ cargo test -- --nocapture
 - [ ] Use a "jump" overlay (outline) in the report view
 - [ ] Allow choice to minimize waste or cost
 - [ ] Bulk deletions and updates
-    - [ ] Toggle to enable bulk edit mode
-    - [ ] Multi-select in the column view
-    - [ ] Choose which field to update
+  - [ ] Toggle to enable bulk edit mode
+  - [ ] Multi-select in the column view
+  - [ ] Choose which field to update
 - [ ] Find a way to make it more fun
 - [ ] Deploy through aws or azure

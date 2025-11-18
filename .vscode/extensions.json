@@ -1,0 +1,6 @@
+{
+  // https://code.visualstudio.com/docs/configure/extensions/extension-marketplace#_workspace-recommended-extensions
+  "recommendations": [
+    "rust-lang.rust-analyzer"
+  ]
+}
