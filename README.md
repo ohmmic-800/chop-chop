@@ -14,7 +14,7 @@ Install settings gschema by running the following from the top-level repo direct
 
 Run this command after making any edits to `gschema.xml`.
 
-ctrl+alt for inlay hints
+Use `ctrl + alt` to show inlay hints.
 
 ## Building
 
@@ -42,12 +42,16 @@ To run unit tests and show printed output:
 cargo test -- --nocapture
 ```
 
+## Design Inspiration
+
+- [Exhibit](https://flathub.org/en/apps/io.github.nokse22.Exhibit)
+- [Halftone](https://flathub.org/en/apps/io.github.tfuxu.Halftone)
+
+## Resources
+
+- [Wikipedia: Cutting Stock Problem](https://en.wikipedia.org/wiki/Cutting_stock_problem)
+
 ## Todos
-
-### Design Inspiration
-
-- https://flathub.org/en/apps/io.github.nokse22.Exhibit
-- https://flathub.org/en/apps/io.github.tfuxu.Halftone
 
 ### Short-Term
 
